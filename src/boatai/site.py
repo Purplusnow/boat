@@ -258,21 +258,22 @@ def recent_form(runners: List[Dict]) -> List[Dict]:
     return out
 
 
-def race_picks(runners: List[Dict], n: int = 3) -> List[Dict]:
-    """상위 n정. **결과와 무관하게** 항상 만든다.
+def race_picks(runners: List[Dict]) -> List[Dict]:
+    """6정 전부를 **정번 순**으로. 결과와 무관하게 항상 만든다.
 
-    1순위만 적으면 목록에서 '이 경주를 어떻게 보는가'가 안 보인다. 승식은
-    대부분 두세 정의 조합이라, 목록 단계에서 상위 3정이 함께 보여야 훑어보는
-    사람이 경주를 고를 수 있다.
+    상위 몇 정만 적으면 나머지를 어떻게 보는지가 안 보이고, 순위 순으로 늘어
+    놓으면 카드마다 정번 자리가 달라져 여러 경주를 훑을 때 눈이 매번 다시
+    자리를 찾아야 한다. **정번 순으로 고정하면 칸이 줄 맞춰져** 1코스끼리,
+    6코스끼리 세로로 비교된다. 순위는 기호(★◎○▲△)가 알려준다.
 
     적중 여부(outcome)와 분리해 두어야 '아직 안 달린 경주'와 '빗나간 경주'가
     같은 빈칸으로 보이지 않는다.
     """
     if not runners:
         return []
-    ordered = sorted(runners, key=lambda x: x["pred_rank"] or 99)[:n]
     return [{"lane": r["lane"], "racer": r["racer_nm"], "mark": r.get("mark"),
-             "p_win": r.get("p_win")} for r in ordered]
+             "p_win": r.get("p_win"), "ord": r.get("ord")}
+            for r in sorted(runners, key=lambda x: x["lane"])]
 
 
 def race_outcome(runners: List[Dict]) -> Dict:

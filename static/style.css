@@ -512,16 +512,31 @@ a.ri:hover { border-color: var(--accent); text-decoration: none; }
 /* 결과는 오른쪽 끝에 붙인다 — 눈이 한 줄을 훑고 끝에서 결론을 만난다. */
 .ri-hit { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 
-/* 추천 3정. 폭이 모자라면 여기서 줄바꿈된다. */
-.ri-picks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.pk {
-  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
-  font-size: 13.5px;
+/* 6정 그리드. 정번 순으로 고정해 카드끼리 칸이 줄 맞는다 — 여러 경주를
+   훑을 때 1코스끼리, 6코스끼리 세로로 비교된다. */
+.ri-picks {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;
 }
-.pk .mark { font-size: 14px; }
-.pk-nm { font-weight: 500; }
-.pk small { color: var(--dim); font-variant-numeric: tabular-nums; }
-.pk-none { font-size: 12.5px; color: var(--dim); }
+.pk {
+  display: flex; align-items: center; gap: 5px; min-width: 0;
+  padding: 4px 6px; border-radius: 7px; background: var(--bg);
+  font-size: 12.5px;
+}
+/* 기호를 받은 정(상위 4정)만 앞으로 나온다. 나머지는 배경에 가깝게. */
+.pk-hi { background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+.pk:not(.pk-hi) { opacity: .62; }
+/* 1착한 정 — 결과가 나온 경주에서 한눈에 찾을 수 있게. */
+.pk-win { box-shadow: inset 0 0 0 2px var(--plus); opacity: 1; }
+.pk-l { display: flex; align-items: center; gap: 2px; flex: none; }
+.pk .mark { font-size: 13px; width: 13px; text-align: center; }
+.pk-nm {
+  font-weight: 500; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.pk small {
+  margin-left: auto; color: var(--dim); font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.pk-none { font-size: 12.5px; color: var(--dim); grid-column: 1 / -1; }
 
 /* 발주 시각이 지난 경주. 목록에서 빼지는 않는다 — 그날 시간표를 이어서 볼 수
    있어야 하고, 무엇을 밀었는지도 남아야 한다.
@@ -542,7 +557,5 @@ a.ri.is-past:hover { background: var(--panel); border-color: var(--accent); }
   color: var(--dim); font-weight: 500;
 }
 
-@media (max-width: 640px) {
-  .ri-picks { gap: 5px 10px; }
-  .pk { font-size: 12.5px; }
-}
+@media (max-width: 1000px) { .ri-picks { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 560px)  { .ri-picks { grid-template-columns: repeat(2, 1fr); } }

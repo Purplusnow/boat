@@ -20,6 +20,7 @@ import json
 import logging
 import sqlite3
 import sys
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
@@ -210,9 +211,71 @@ def predict_backfill(conn: sqlite3.Connection, n_folds: int = 5,
     return total
 
 
+# ---------------------------------------------------------------------------
+# 확정 기록의 보존
+# ---------------------------------------------------------------------------
+#
+# 발주 전에 확정 저장한 예상은 **절대 잃으면 안 되는 기록**이다. 적중률이
+# 사후 조작이 아니라는 근거가 오직 이것뿐이기 때문이다. 그런데 자동 배포에서
+# DB 는 임시 캐시에 있고, 캐시는 만료되거나 지워진다 — 그 순간 지금까지의
+# 실전 기록이 통째로 사라진다.
+#
+# 그래서 확정 기록만 따로 파일로 떠서 저장소에 남긴다. 경주당 6행이라 한 해를
+# 다 모아도 몇 MB 다. 수집 자료(140MB)와 달리 저장소에 담을 만한 크기다.
+
+FROZEN_PATH = Path("records/frozen.json")
+
+
+def export_frozen(conn: sqlite3.Connection, path: Path = FROZEN_PATH) -> int:
+    """확정 저장한 예상과 전개를 파일로 뜬다."""
+    preds = [dict(r) for r in conn.execute(
+        "SELECT race_key, lane, racer_nm, p_win, p_top2, p_top3, pred_rank, "
+        "model_version, created_at FROM predictions WHERE model_version = ? "
+        "ORDER BY race_key, lane", (MODEL_VERSION,))]
+    sims = [dict(r) for r in conn.execute(
+        "SELECT race_key, payload, conf_label, conf_score, top_tactic, n_sims, "
+        "created_at FROM simulations ORDER BY race_key")]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"predictions": preds, "simulations": sims},
+                               ensure_ascii=False, indent=1), encoding="utf-8")
+    return len(preds)
+
+
+def import_frozen(conn: sqlite3.Connection, path: Path = FROZEN_PATH) -> int:
+    """파일의 확정 기록을 DB 로 되돌린다.
+
+    **이미 있는 행은 절대 덮어쓰지 않는다.** 확정 기록은 한 번 쓰이면 바뀌지
+    않는 것이고, 되돌리는 과정에서 값이 달라지면 그 기록은 아무것도 증명하지
+    못한다. 없는 것만 채운다.
+    """
+    if not path.exists():
+        return 0
+    try:
+        blob = json.loads(path.read_text(encoding="utf-8"))
+    except ValueError:
+        log.warning("확정 기록 파일을 읽지 못했습니다: %s", path)
+        return 0
+    n = 0
+    for r in blob.get("predictions", []):
+        cols = ",".join(r)
+        conn.execute(
+            f"INSERT INTO predictions({cols}) VALUES({','.join('?' * len(r))}) "
+            "ON CONFLICT(race_key, lane, model_version) DO NOTHING",
+            tuple(r.values()))
+        n += 1
+    for r in blob.get("simulations", []):
+        cols = ",".join(r)
+        conn.execute(
+            f"INSERT INTO simulations({cols}) VALUES({','.join('?' * len(r))}) "
+            "ON CONFLICT(race_key) DO NOTHING", tuple(r.values()))
+    conn.commit()
+    return n
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="경정 예측 생성")
-    ap.add_argument("command", choices=["upcoming", "backfill"])
+    ap.add_argument("command",
+                    choices=["upcoming", "backfill", "export", "import"])
     ap.add_argument("--db", default="data/boatai.sqlite")
     ap.add_argument("--folds", type=int, default=5)
     args = ap.parse_args(argv)
@@ -225,8 +288,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             except FileNotFoundError as e:
                 print(f"✗ {e}", file=sys.stderr)
                 return 1
-        else:
+        elif args.command == "backfill":
             predict_backfill(conn, n_folds=args.folds)
+        elif args.command == "export":
+            n = export_frozen(conn)
+            print(f"확정 기록 {n}행 → {FROZEN_PATH}")
+        elif args.command == "import":
+            n = import_frozen(conn)
+            print(f"확정 기록 {n}행 복원 (이미 있는 행은 그대로)")
     return 0
 
 

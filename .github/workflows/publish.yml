@@ -21,7 +21,8 @@ on:
   workflow_dispatch:           # 손으로도 돌릴 수 있게
 
 permissions:
-  contents: read
+  # 확정 기록(records/frozen.json)을 저장소에 되돌려 쓰기 위해 write 가 필요하다.
+  contents: write
   pages: write
   id-token: write
 
@@ -77,6 +78,12 @@ jobs:
           fi
           python -m boatai.kboat.collect prune
 
+      # 확정 기록을 DB 로 되돌린다. 캐시가 만료되면 DB 는 새로 만들어지는데,
+      # **발주 전에 확정 저장한 예상은 그때 사라지면 안 된다** — 적중률이
+      # 사후 조작이 아니라는 근거가 그것뿐이다. 저장소의 파일이 원본이다.
+      - name: 확정 기록 복원
+        run: python -m boatai.predict import
+
       # 비싼 단계가 끝났으니 곧바로 저장한다. 뒤에서 실패해도 남는다.
       - name: 수집 자료 저장
         if: always()
@@ -94,6 +101,20 @@ jobs:
       # 실행에서도 일부는 비어 있다. 다만 로그에는 남겨 눈에 띄게 한다.
       - name: 자료 점검
         run: python -m boatai.audit --days 30 || true
+
+      # 새로 확정한 예상을 저장소에 남긴다. 캐시는 임시지만 저장소는 남는다.
+      - name: 확정 기록 저장
+        run: |
+          python -m boatai.predict export
+          if git diff --quiet records/; then
+            echo "새로 확정된 예상 없음"
+          else
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add records/
+            git commit -m "확정 기록 갱신 ($(TZ=Asia/Seoul date +%Y-%m-%d\ %H:%M) KST)"
+            git push
+          fi
 
       - name: 사이트 빌드
         run: python -m boatai.site
