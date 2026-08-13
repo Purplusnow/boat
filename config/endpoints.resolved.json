@@ -1,0 +1,23 @@
+{
+  "paths": {
+    "race_result": "SRVC_OD_API_MBR_RACE_RESULT/TODZ_API_MBR_RACE_RESULT_I",
+    "race_card": "SRVC_OD_API_VWEB_MBR_RACE_INFO/TODZ_API_VWEB_MBR_RACE_I",
+    "race_rank": "SRVC_MRA_RACE_RANK/TODZ_MRA_RACE_RANK",
+    "payoff": "SRVC_OD_API_MBR_PAYOFF/TODZ_API_MBR_PAYOFF_I",
+    "racer_tms": "SRVC_OD_API_VWEB_MBR_RACER_TMS_INFO/TODZ_API_VWEB_RACER_TMS_I",
+    "racer_win_rank": "SRVC_TODZ_API_MRA_RACER_WIN_RANK_I/TODZ_API_MRA_RACER_WIN_RANK_I"
+  },
+  "meta": {
+    "probed_at": "2026-08-13T01:02:30",
+    "context": {
+      "stnd_yr": "2026",
+      "week_tcnt": 5,
+      "day_tcnt": 1,
+      "race_no": 1,
+      "motor_no": 78,
+      "boat_no": 56,
+      "racer_no": 1,
+      "race_ymd": "20260128"
+    }
+  }
+}

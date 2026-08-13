@@ -1,0 +1,582 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "경주연도, 선수명, 선수번호 등을 이용해 서울올림픽기념국민체육진흥공단에서 시행하는 경정경주의 선수별 정상출발 현황 정보 조회를 제공하는 서비스입니다. 경정경주는 플라잉스타트, 온라인스타트 2가지 출발방식이 있습니다. 플라잉스타트는 경정만의 독특한 출발방식인 플라잉스타트는 6척의 모터보트가 전속력으로 대시계가 0초(12시방향)에서 1.0초를 가리키는 사이에 물위에 그려진 가상의 출발선을 통과합니다. 좀더 0초에 가까운 출발을 한 선수가 경주의 주도권을 쥡니다. 경정에 대한 자세한 소개는 경정홈페이지(www.kboat.or.kr)을 참고하세요.  \\n",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-선수별 정상출발 현황 정보"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_MRA_RACER_STRT",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/TODZ_MRA_RACER_STRT": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "type": "object",
+                  "description": "header",
+                  "properties": {
+                    "resultCode": {
+                      "type": "string",
+                      "description": "결과코드",
+                      "properties": {}
+                    },
+                    "resultMsg": {
+                      "type": "string",
+                      "description": "결과메세지",
+                      "properties": {}
+                    }
+                  }
+                },
+                "body": {
+                  "type": "object",
+                  "description": "body",
+                  "properties": {
+                    "items": {
+                      "type": "object",
+                      "description": "items",
+                      "properties": {
+                        "item": {
+                          "type": "object",
+                          "description": "item",
+                          "properties": {
+                            "row_num": {
+                              "type": "string",
+                              "description": "순번",
+                              "properties": {}
+                            },
+                            "stnd_yr": {
+                              "type": "string",
+                              "description": "기준연도",
+                              "properties": {}
+                            },
+                            "racer_no": {
+                              "type": "string",
+                              "description": "선수번호",
+                              "properties": {}
+                            },
+                            "racer_nm": {
+                              "type": "string",
+                              "description": "선수명",
+                              "properties": {}
+                            },
+                            "racer_grd_cd": {
+                              "type": "string",
+                              "description": "선수등급",
+                              "properties": {}
+                            },
+                            "norm_strt_cnt": {
+                              "type": "string",
+                              "description": "정상출발횟수",
+                              "properties": {}
+                            },
+                            "rect_voil_cnt": {
+                              "type": "string",
+                              "description": "출발위반횟수",
+                              "properties": {}
+                            },
+                            "elim_cnt": {
+                              "type": "string",
+                              "description": "실격횟수",
+                              "properties": {}
+                            },
+                            "af_norm_strt_cnt": {
+                              "type": "string",
+                              "description": "최근출발위반이후 정상출발횟수",
+                              "properties": {}
+                            },
+                            "rect_voil": {
+                              "type": "string",
+                              "description": "최근출발위반",
+                              "properties": {}
+                            },
+                            "rect_voil_dt": {
+                              "type": "string",
+                              "description": "최근출발위반일자",
+                              "properties": {}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "totalCount": {
+                      "type": "string",
+                      "description": "전체 결과 수",
+                      "properties": {}
+                    },
+                    "numOfRows": {
+                      "type": "string",
+                      "description": "한 페이지 결과 수",
+                      "properties": {}
+                    },
+                    "pageNo": {
+                      "type": "string",
+                      "description": "페이지번호",
+                      "properties": {}
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 선수 정상출발 정보 조회",
+        "description": "경주연도, 선수명, 선수번호 조회조건을 이용하여 경정선수 정상출발 현황 정보를 조회하는 기능",
+        "operationId": "TODZ_MRA_RACER_STRT",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "기준연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "racer_no",
+          "description": "선수번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "racer_nm",
+          "description": "선수명",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "TODZ_MRA_RACER_STRT_response": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "type": "object",
+          "description": "header",
+          "properties": {
+            "resultCode": {
+              "type": "string",
+              "description": "결과코드"
+            },
+            "resultMsg": {
+              "type": "string",
+              "description": "결과메세지"
+            }
+          }
+        },
+        "body": {
+          "type": "object",
+          "description": "body",
+          "properties": {
+            "items": {
+              "type": "object",
+              "description": "items",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "description": "item",
+                  "properties": {
+                    "row_num": {
+                      "type": "string",
+                      "description": "순번"
+                    },
+                    "stnd_yr": {
+                      "type": "string",
+                      "description": "기준연도"
+                    },
+                    "racer_no": {
+                      "type": "string",
+                      "description": "선수번호"
+                    },
+                    "racer_nm": {
+                      "type": "string",
+                      "description": "선수명"
+                    },
+                    "racer_grd_cd": {
+                      "type": "string",
+                      "description": "선수등급"
+                    },
+                    "norm_strt_cnt": {
+                      "type": "string",
+                      "description": "정상출발횟수"
+                    },
+                    "rect_voil_cnt": {
+                      "type": "string",
+                      "description": "출발위반횟수"
+                    },
+                    "elim_cnt": {
+                      "type": "string",
+                      "description": "실격횟수"
+                    },
+                    "af_norm_strt_cnt": {
+                      "type": "string",
+                      "description": "최근출발위반이후 정상출발횟수"
+                    },
+                    "rect_voil": {
+                      "type": "string",
+                      "description": "최근출발위반"
+                    },
+                    "rect_voil_dt": {
+                      "type": "string",
+                      "description": "최근출발위반일자"
+                    }
+                  }
+                }
+              }
+            },
+            "totalCount": {
+              "type": "string",
+              "description": "전체 결과 수"
+            },
+            "numOfRows": {
+              "type": "string",
+              "description": "한 페이지 결과 수"
+            },
+            "pageNo": {
+              "type": "string",
+              "description": "페이지번호"
+            }
+          }
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_MRA_RACER_STRT/TODZ_MRA_RACER_STRT",
+      "oprtinNm": "경정 선수 정상출발 정보 조회",
+      "oprtinDc": "경주연도, 선수명, 선수번호 조회조건을 이용하여 경정선수 정상출발 현황 정보를 조회하는 기능",
+      "gwSvcNm": "TODZ_MRA_RACER_STRT",
+      "operationId": "TODZ_MRA_RACER_STRT",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_yr",
+          "paramtrDc": "기준연도",
+          "paramtrBassValue": "2024",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "racer_no",
+          "paramtrDc": "선수번호",
+          "paramtrBassValue": "01-001",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "racer_nm",
+          "paramtrDc": "선수명",
+          "paramtrBassValue": "강지환",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "arrayYn": "N",
+          "paramtrDefNm": "#/definitions/MRA_RACER_STRT-header",
+          "subDefNm": "MRA_RACER_STRT-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true,
+          "subParam": [
+            {
+              "paramtrNm": "resultCode",
+              "paramtrDc": "결과코드",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "resultMsg",
+              "paramtrDc": "결과메세지",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            }
+          ]
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "arrayYn": "N",
+          "paramtrDefNm": "#/definitions/MRA_RACER_STRT-body",
+          "subDefNm": "MRA_RACER_STRT-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true,
+          "subParam": [
+            {
+              "paramtrNm": "items",
+              "paramtrDc": "items",
+              "arrayYn": "N",
+              "paramtrDefNm": "#/definitions/MRA_RACER_STRT-items",
+              "subDefNm": "MRA_RACER_STRT-items",
+              "paramtrTy": "object",
+              "paramtrDivision": "필수",
+              "ck": true,
+              "subParam": [
+                {
+                  "paramtrNm": "item",
+                  "paramtrDc": "item",
+                  "arrayYn": "N",
+                  "paramtrDefNm": "#/definitions/MRA_RACER_STRT-item",
+                  "subDefNm": "MRA_RACER_STRT-item",
+                  "paramtrTy": "object",
+                  "paramtrDivision": "필수",
+                  "ck": true,
+                  "subParam": [
+                    {
+                      "paramtrNm": "row_num",
+                      "paramtrDc": "순번",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "stnd_yr",
+                      "paramtrDc": "기준연도",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_no",
+                      "paramtrDc": "선수번호",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_nm",
+                      "paramtrDc": "선수명",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_grd_cd",
+                      "paramtrDc": "선수등급",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "norm_strt_cnt",
+                      "paramtrDc": "정상출발횟수",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "rect_voil_cnt",
+                      "paramtrDc": "출발위반횟수",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "elim_cnt",
+                      "paramtrDc": "실격횟수",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "af_norm_strt_cnt",
+                      "paramtrDc": "최근출발위반이후 정상출발횟수",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "rect_voil",
+                      "paramtrDc": "최근출발위반",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "rect_voil_dt",
+                      "paramtrDc": "최근출발위반일자",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "paramtrNm": "totalCount",
+              "paramtrDc": "전체 결과 수",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "numOfRows",
+              "paramtrDc": "한 페이지 결과 수",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "pageNo",
+              "paramtrDc": "페이지번호",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

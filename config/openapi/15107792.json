@@ -1,0 +1,299 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "서울올림픽기념 국민체육진흥공단 경륜경정총괄본부에서 제공하는 경정 경주동영상 정보 조회 API는 조회 연도와 경기 회차를 기준으로 해당 경주의 실제 경기 영상을 확인할 수 있는 Open API 서비스입니다. 이 API를 통해 사용자는 경정 경기의 결과뿐 아니라 실제 경주 장면을 시청함으로써 선수 주행 스타일 분석, 주요 장면 확인, 팬 서비스 강화 등 다양한 목적으로 활용할 수 있습니다. 또한 온라인 콘텐츠 제작, 스포츠 미디어 분석, 경기 리뷰 자료로도 사용 가능하며, 영상 데이터 기반의 실시간 정보 제공 서비스 구현에 유용한 기반을 제공합니다. 본 API는 공공데이터 활용 활성화와 디지털 스포츠 콘텐츠 확산에 기여하고 있습니다.\\n",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-경주영상 정보_GW"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_OD_API_WEB_BOAT_RACE_VIDEO",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/TODZ_API_MRA_BOAT_RACE_I": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/API_MRA_BOAT_RACE_I-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/API_MRA_BOAT_RACE_I-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정경주동영상 정보 조회",
+        "description": "조회연도, 경기회차, 경기일차 등의 조회조건을 이용해 기금조성총괄본부에서 진행하는 경정 경기의 경주동영상을 조회하는 기능",
+        "operationId": "TODZ_API_MRA_BOAT_RACE_I",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "week_tcnt",
+          "description": "등록회차수",
+          "type": "number",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "day_tcnt",
+          "description": "경기회차수",
+          "type": "number",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "API_MRA_BOAT_RACE_I-item": {
+      "type": "object",
+      "properties": {
+        "race_video_url": {
+          "type": "string",
+          "description": "동영상URL"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        },
+        "updt_dt": {
+          "type": "string",
+          "description": "수정일시"
+        },
+        "created_dt": {
+          "type": "string",
+          "description": "생성일시"
+        },
+        "race_ymd": {
+          "type": "string",
+          "description": "경주일자"
+        },
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "week_tcnt": {
+          "type": "string",
+          "description": "등록회차수"
+        },
+        "day_tcnt": {
+          "type": "string",
+          "description": "경기회차수"
+        },
+        "race_no": {
+          "type": "string",
+          "description": "경주번호"
+        }
+      }
+    },
+    "API_MRA_BOAT_RACE_I-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/API_MRA_BOAT_RACE_I-item"
+        }
+      }
+    },
+    "API_MRA_BOAT_RACE_I-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "API_MRA_BOAT_RACE_I-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/API_MRA_BOAT_RACE_I-items"
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_OD_API_WEB_BOAT_RACE_VIDEO/TODZ_API_MRA_BOAT_RACE_I",
+      "oprtinNm": "경정경주동영상 정보 조회",
+      "oprtinDc": "조회연도, 경기회차, 경기일차 등의 조회조건을 이용해 기금조성총괄본부에서 진행하는 경정 경기의 경주동영상을 조회하는 기능",
+      "gwSvcNm": "TODZ_API_MRA_BOAT_RACE_I",
+      "operationId": "TODZ_API_MRA_BOAT_RACE_I",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_yr",
+          "paramtrDc": "경기연도",
+          "paramtrBassValue": "2020",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "week_tcnt",
+          "paramtrDc": "등록회차수",
+          "paramtrBassValue": "43",
+          "paramtrTy": "number",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "day_tcnt",
+          "paramtrDc": "경기회차수",
+          "paramtrBassValue": "2",
+          "paramtrTy": "number",
+          "paramtrDivision": "옵션",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "paramtrDefNm": "#/definitions/API_MRA_BOAT_RACE_I-header",
+          "subDefNm": "API_MRA_BOAT_RACE_I-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "paramtrDefNm": "#/definitions/API_MRA_BOAT_RACE_I-body",
+          "subDefNm": "API_MRA_BOAT_RACE_I-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "서울올림픽기념국민체육진흥공단 경륜경정총괄본부에서 제공하는 경정모터정보는 연도 및 모터번호별로 출주횟수, 1~3착 횟수, 6회 평균착순점, 연대율, 최소 소개항주타임 등 다양한 성적 데이터를 포함한 API 서비스입니다. 경정경주에서 모터는 보트, 선수와 함께 경기 결과에 큰 영향을 미치는 핵심 장비로, 공정성을 확보하기 위해 경주 전 선수들이 직접 추첨을 통해 모터와 보트를 배정받습니다. 이 정보는 모터 성능을 분석하고 경기 예측 및 전략 수립에 활용할 수 있어 관계자와 팬 모두에게 중요한 참고 자료로 활용됩니다.",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-모터정보_GW"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_OD_API_VWEB_MBR_MOTOR_INFO",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/todz_api_vweb_motor_i": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/api_vweb_motor_i-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/api_vweb_motor_i-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정모터정보",
+        "description": "경정모터정보",
+        "operationId": "todz_api_vweb_motor_i",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "motor_no",
+          "description": "모터번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "api_vweb_motor_i-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "api_vweb_motor_i-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/api_vweb_motor_i-items"
+        }
+      }
+    },
+    "api_vweb_motor_i-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/api_vweb_motor_i-item"
+        }
+      }
+    },
+    "api_vweb_motor_i-item": {
+      "type": "object",
+      "properties": {
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "motor_no": {
+          "type": "string",
+          "description": "모터번호"
+        },
+        "race_tcnt": {
+          "type": "string",
+          "description": "출주횟수"
+        },
+        "rank1_tcnt": {
+          "type": "string",
+          "description": "1위횟수"
+        },
+        "rank2_tcnt": {
+          "type": "string",
+          "description": "2위횟수"
+        },
+        "rank3_tcnt": {
+          "type": "string",
+          "description": "3위횟수"
+        },
+        "avg_rank": {
+          "type": "string",
+          "description": "평균착순위"
+        },
+        "high_rate": {
+          "type": "string",
+          "description": "연대율"
+        },
+        "min_itrdt_run_tm": {
+          "type": "string",
+          "description": "최고항주시각"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_OD_API_VWEB_MBR_MOTOR_INFO/todz_api_vweb_motor_i",
+      "oprtinNm": "경정모터정보",
+      "oprtinDc": "경정모터정보",
+      "gwSvcNm": "todz_api_vweb_motor_i",
+      "operationId": "todz_api_vweb_motor_i",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_yr",
+          "paramtrDc": "경기연도",
+          "paramtrBassValue": "2015",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "motor_no",
+          "paramtrDc": "모터번호",
+          "paramtrBassValue": "M2014110",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "paramtrDefNm": "#/definitions/api_vweb_motor_i-header",
+          "subDefNm": "api_vweb_motor_i-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "paramtrDefNm": "#/definitions/api_vweb_motor_i-body",
+          "subDefNm": "api_vweb_motor_i-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        }
+      ]
+    }
+  ]
+}

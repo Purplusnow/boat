@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% from "_macros.html" import version_badge, lane_no with context %}
+
+{% block title %}{{ race.race_ymd | date_ko }} {{ race.race_no }}R 상세예상 · {{ site.name }}{% endblock %}
+{% block description %}미사리 {{ race.race_ymd | date_ko }} {{ race.race_no }}R — 여섯 척의 승률 예측, 1턴마크 전개 시뮬레이션, 출주표 상세.{% endblock %}
+
+{% block content %}
+
+<nav class="crumb">
+  <a href="{{ base }}/">예상</a> ›
+  <a href="{{ base }}/day/{{ race.race_ymd }}/">{{ race.race_ymd | date_ko }}</a> ›
+  <span>{{ race.race_no }}R</span>
+</nav>
+
+<section class="race-head">
+  <h1>{{ race.race_no }}R {{ version_badge(race.version, version_label) }}</h1>
+  <p class="meta">
+    {{ race.race_ymd | date_ko }} · 발주 {{ race.post_time or '—' }} ·
+    {{ race.stnd_yr }}년 {{ race.week_tcnt }}회차 {{ race.day_tcnt }}일차
+    {% if race.race_class %}· {{ race.race_class }}{% endif %}
+    · {{ race.field_size or 6 }}정 · 1800m (턴마크 2개 · 3바퀴)
+    {% if race.st_method %}· 경주구분 {{ race.st_method | trim }}{% endif %}
+  </p>
+  {% if race.version == 'v1-oos' %}
+  <p class="warn-inline">
+    이 예상은 <strong>사후에 만든 모의 기록</strong>입니다. 그 경주 이전 자료만으로
+    학습한 모델이 만들었지만, 발주 전에 공개된 것은 아닙니다.
+  </p>
+  {% endif %}
+</section>
+
+{% if race.outcome %}
+<section class="card outcome {{ 'ok' if race.outcome.hit_win else 'no' }}">
+  <h2>결과</h2>
+  <p>
+    1순위로 꼽은 <b>{{ lane_no(race.outcome.top1_lane, "xs") }}{{ race.outcome.top1_racer }}</b> 가
+    {% if race.outcome.top1_ord %}<b>{{ race.outcome.top1_ord }}착</b>{% else %}착순 미확인{% endif %}.
+    {% if race.outcome.hit_win %}단승 적중.
+    {% elif race.outcome.hit_place %}단승은 빗나갔지만 2착 이내(연승 적중).
+    {% else %}빗나갔습니다.{% endif %}
+    {% if race.outcome.hit_quinella %} 복승 적중.{% endif %}
+    {% if race.outcome.hit_trio %} 삼복승 적중.{% endif %}
+  </p>
+</section>
+{% endif %}
+
+{# ── 예상판 ────────────────────────────────────────────────── #}
+<section class="card">
+  <h2>AI 예상</h2>
+  <div class="board">
+    {% for r in race.runners | sort(attribute='pred_rank') %}
+    <div class="board-row {{ 'is-top' if r.pred_rank == 1 else '' }}">
+      <b class="mark" title="{{ r.mark_meaning }}">{{ r.mark or '·' }}</b>
+      {{ lane_no(r.lane, "m") }}
+      <span class="bname">{{ r.racer_nm }}<small>{{ r.racer_grd }} · {{ r.age }}세</small></span>
+      <span class="bar"><i style="width: {{ (r.p_win * 100) | round(1) }}%"></i></span>
+      <b class="bpct">{{ r.p_win | pct }}</b>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="legend small">
+    {% for m, meaning in mark_meaning.items() %}<span><b class="mark">{{ m }}</b> {{ meaning }}</span>{% endfor %}
+  </div>
+</section>
+
+{# ── 전개 시뮬레이션 ───────────────────────────────────────── #}
+{% if race.sim and race.sim.script %}
+<section class="card">
+  <h2>
+    전개 시뮬레이션
+    <span class="conf conf-{{ race.sim.confidence.label }}">{{ race.sim.confidence.label }}</span>
+  </h2>
+  <p class="note">
+    1턴마크 선회를 {{ '{:,}'.format(race.sim.n_sims) }}회 반복 계산했습니다.
+    선회 속도는 √(A·r) 로 제한되므로 <b>안쪽은 먼저 빠져나오고 바깥은 속도를
+    싣고 나옵니다.</b> 아래 화면은 <b>예상대로 전개된 경우</b>이며, 실제 경주는
+    다르게 진행될 수 있습니다.
+  </p>
+
+  {% if race.sim.player and race.sim.player.boats %}
+  <div id="player" class="player">
+    {# 순위는 캔버스 **위쪽 가로 띠**에 둔다. 화면에 겹쳐 놓으면 정작 봐야 할
+       선회 장면을 가린다 — 겹치지 않으면서 눈이 한 번만 움직이면 되는 자리다. #}
+    <ol id="rp-order" class="rp-order" aria-live="off"></ol>
+    <canvas id="rp-canvas" class="rp-canvas" width="720" height="300"
+            aria-label="경주 주행 시뮬레이션 (미사리 수면을 위에서 본 화면)"></canvas>
+    <div class="rp-controls">
+      <button id="rp-play" class="rp-btn" type="button">▶ 재생</button>
+      <button id="rp-replay" class="rp-btn rp-ghost" type="button">↻ 다시</button>
+      <span class="rp-speed" role="group" aria-label="재생 속도">
+        <button type="button" class="rp-rate on" data-rate="1.6">기본</button>
+        <button type="button" class="rp-rate" data-rate="4">빠르게</button>
+      </span>
+      {# 기본은 전체 시야다. 코스 배치(부표 두 개와 센터폰툰)와 여섯 척의
+         위치 관계가 먼저 보여야 전개가 읽힌다. 확대는 그다음 선택이다. #}
+      <span class="rp-speed" role="group" aria-label="시야">
+        <button type="button" class="rp-view on" data-view="whole">전체</button>
+        <button type="button" class="rp-view" data-view="follow">따라가기</button>
+      </span>
+      <input id="rp-seek" class="rp-seek" type="range" min="0" max="1000" value="0"
+             aria-label="구간 이동">
+      <span id="rp-clock" class="rp-clock"></span>
+    </div>
+    <p class="note">
+      <b>선회 밀림</b>은 선체가 진행 방향보다 안쪽을 향한 각도입니다 —
+      값이 클수록 크게 미끄러지며 돌고 있다는 뜻입니다.
+      턴마크 2개(300m 간격)를 도는 실제 코스 기하로 계산합니다. 선회 반경이
+      작을수록 진입 속도를 많이 줄여야 하며, 그 감속과 방향 전환을 선미를
+      바깥으로 흘리며 처리합니다 — 화면의 슬립각이 그 계산값입니다.
+      공식 1주회 600m 는 최내측 이론선이고 실주행은 3바퀴 약 2,180m 입니다.
+    </p>
+  </div>
+  <script id="player-data" type="application/json">{{ race.sim.player | tojson }}</script>
+  <script src="{{ base }}/static/race-player.js?v={{ assets.get('race-player.js', '1') }}" defer></script>
+  {% endif %}
+
+  <ol class="scenes">
+    {% for sc in race.sim.script %}
+    <li class="scene">
+      <div class="scene-head"><b>{{ sc.title }}</b></div>
+      <div class="order-badges">
+        {% for b in sc.boats %}
+        <span class="ob"><i class="rank">{{ loop.index }}</i>{{ lane_no(b.lane, "s") }}{{ b.racer_nm }}</span>
+        {% endfor %}
+      </div>
+      <p class="scene-text">{{ sc.text }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+
+  <p class="tactic">
+    {% if race.sim.script_is_expected %}
+    위 전개는 반복 계산 중 <b>예상대로 진행된 경우</b>를 나타냅니다.
+    {% else %}
+    예상 1순위가 승리한 경우가 없어, 가장 자주 나온 전개를 표시합니다.
+    {% endif %}
+    전법 <b>{{ race.sim.top_tactic }}</b> — {{ race.sim.tactic_note }}
+  </p>
+
+  <h3>1턴마크에서 무슨 일이 벌어지나</h3>
+  <div class="scroll">
+  <table class="tbl">
+    <thead><tr><th>정번</th><th>선수</th><th class="r">최내측 확보</th>
+               <th class="r">1턴 선두 탈출</th><th class="r">평균 선회반경</th>
+               <th class="r">예상 승률</th></tr></thead>
+    <tbody>
+      {% for b in race.sim.per_boat %}
+      {% set m = (race.runners | selectattr('lane', 'equalto', b.lane) | first) %}
+      <tr>
+        <td>{{ lane_no(b.lane, "s") }}</td>
+        <td>{{ lane_no(b.lane, "xs") }}{{ b.racer_nm }}</td>
+        <td class="r">{{ b.turn1_inside | pct }}</td>
+        <td class="r strong">{{ b.turn1_lead | pct }}</td>
+        <td class="r">{{ b.avg_radius | num(1) }}m</td>
+        <td class="r strong">{{ m.p_win | pct if m else '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    전법 분포:
+    {% for t in race.sim.tactics %}<span class="chip">{{ t.name }} {{ t.share | pct(0) }}</span> {% endfor %}
+  </p>
+  <p class="note">
+    선회 반경과 횡가속 한계는 추정값이므로 <b>절대 시간이 아니라 순서와 우열</b>을
+    보는 자료입니다. 상수는 실제 코스별 1착 비율에 맞춰 보정했으며, 기량을
+    동일하게 두고 정번만 바꾸면 36.2/22.3/16.2/11.8/7.9/5.5% 로 실측
+    (36.1/23.2/16.2/12.5/7.8/4.1%)을 재현합니다.
+    <b>승률은 학습 모델이 산출하며, 시뮬레이션은 그 예상이 어떤 전개로
+    이어지는지를 보여줍니다.</b>
+  </p>
+</section>
+{% endif %}
+
+{# ── 체크 포인트 ───────────────────────────────────────────── #}
+{% if race.focus %}
+<section class="card">
+  <h2>체크 포인트</h2>
+  <div class="focus-grid">
+    {% for f in race.focus %}
+    <div class="focus">
+      <span class="flabel">{{ f.label }}</span>
+      <span class="fval">{{ lane_no(f.lane, "s") }}
+        {{ f.racer_nm }} <b>{{ f.value }}</b>
+        {% if f.sample %}<span class="dim">/ {{ f.sample }}</span>{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ── 출주표 상세 ───────────────────────────────────────────── #}
+<section class="card">
+  <h2>출주표</h2>
+  <p class="note">
+    코스 연대율은 <b>당일 배정 코스</b>의 최근 6개월 기록이며, 아래 숫자는 해당
+    코스 출주 횟수입니다(표본이 적으면 참고치).
+  </p>
+  <div class="scroll">
+  <table class="tbl tbl-card">
+    <thead>
+      <tr>
+        <th>정번</th><th>기호</th><th>선수</th><th>급</th>
+        <th class="r">승률</th><th class="r">2착이내</th><th class="r">3착이내</th>
+        <th class="r">평균착순</th><th class="r">최근6회<br>연대율</th><th class="r">평균ST</th>
+        <th class="r">모터<br>2연대</th><th class="r">보트<br>연대</th>
+        <th class="r">코스<br>연대율</th><th class="r">사고점</th>
+        {% if race.outcome %}<th class="r">착순</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in race.runners %}
+      <tr class="{{ 'winner' if r.is_winner else '' }}">
+        <td>{{ lane_no(r.lane, "s") }}</td>
+        <td><b class="mark" title="{{ r.mark_meaning }}">{{ r.mark }}</b></td>
+        <td class="c-name">{{ lane_no(r.lane, "xs") }}{{ r.racer_nm }}<small>{{ r.age }}세 {{ r.weight | num(0) }}kg</small></td>
+        <td><span class="grd grd-{{ r.racer_grd }}">{{ r.racer_grd or '—' }}</span></td>
+        <td class="r strong">{{ r.p_win | pct }}</td>
+        <td class="r">{{ r.p_top2 | pct }}</td>
+        <td class="r">{{ r.p_top3 | pct }}</td>
+        <td class="r">{{ r.avg_rank | num(2) }}</td>
+        <td class="r">{{ r.tms6_high_rate | num(1) }}%</td>
+        <td class="r">{{ r.tms6_avg_st | num(2) }}</td>
+        <td class="r">{{ r.mot_high_rate | num(1) }}%<small>{{ r.motor_no }}번</small></td>
+        <td class="r">{{ r.boat_high_rate | num(1) }}%<small>{{ r.boat_no }}번</small></td>
+        <td class="r">{{ r.own_course_rate | num(1) }}%<small>{{ r.own_course_cnt or 0 }}회</small></td>
+        <td class="r">{{ r.avg_acdnt_scr | num(2) }}
+          {% if r.f_cnt %}<small class="bad">F{{ r.f_cnt }}</small>{% endif %}</td>
+        {% if race.outcome %}
+        <td class="r">{% if r.ord %}<span class="ord ord-{{ r.ord }}">{{ r.ord }}</span>{% else %}—{% endif %}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if race.st_method and race.st_method | trim == '001' %}
+  <p class="note">
+    이 경주는 <b>경주구분 001</b> 입니다. 평균ST 가 다른 경주(구분 002, 0.0~1.3초)와
+    <strong>다른 눈금으로 기록됩니다</strong>(17~20). 구분이 다른 경주끼리 ST 를
+    직접 비교하지 마세요 — 같은 경주 안에서는 눈금이 같으므로 비교가 됩니다.
+  </p>
+  {% endif %}
+</section>
+
+{# ── 최근 전적 ─────────────────────────────────────────────── #}
+{% if race.form %}
+<section class="card">
+  <h2>최근 8경주 착순</h2>
+  <p class="note">왼쪽이 과거, 오른쪽이 최근. 1·2착 강조.</p>
+  <div class="forms">
+    {% for f in race.form %}
+    <div class="form-row">
+      <b class="mark">{{ f.mark or '·' }}</b>
+      {{ lane_no(f.lane, "s") }}
+      <span class="bname">{{ f.racer_nm }}<small>{{ f.grade }}</small></span>
+      <span class="band">
+        {% for v in f.ranks %}<i class="r{{ v }}">{{ v }}</i>{% endfor %}
+        {% if not f.ranks %}<span class="dim">기록 없음</span>{% endif %}
+      </span>
+      <span class="favg">{% if f.avg %}평균 {{ f.avg | num(2) }}{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if race.combos %}
+<section class="card">
+  <h2>확률을 승식으로 옮기면</h2>
+  <p class="note">
+    위 확률을 승식 형태로 옮긴 참고 표기입니다. 모든 방식의 장기 회수율은
+    100% 미만입니다 — <a href="{{ base }}/strategy/">승식별 실측 회수율</a>.
+  </p>
+  <ul class="combos">
+    {% for c in race.combos %}
+    <li><b>{{ c.label }}</b> <code>{{ c.value }}</code> <span class="dim">{{ c.note }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if race.payoffs %}
+<section class="card">
+  <h2>확정 배당</h2>
+  <table class="tbl tbl-pay">
+    <thead><tr><th>승식</th><th>적중 조합</th><th class="r">배당</th></tr></thead>
+    <tbody>
+      {% for p in race.payoffs %}
+      <tr><td>{{ p.pool }}</td><td><code>{{ p.combo or '—' }}</code></td>
+          <td class="r">{{ p.payout | num(1) }}배</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="note">삼쌍승·쌍복승은 공개 배당 자료가 없어 제외했습니다.</p>
+</section>
+{% endif %}
+
+{% endblock %}

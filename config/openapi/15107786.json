@@ -1,0 +1,265 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "서울올림픽기념국민체육진흥공단 경륜경정총괄본부에서 제공하는 대상경정 연도별 순위정보 API는 특정 타이틀이 걸린 대상경정에 참가한 선수들의 연도별 순위를 제공합니다. 대상경정은 일정 기간 동안 우수한 성적을 거둔 선수들만 참가할 수 있으며, 1~3위 입상자에게는 트로피 등 시상이 주어집니다. 이 API를 통해 선수별 순위, 대상경주명, 조회년도 등 다양한 데이터를 확인할 수 있어 선수 성과 분석과 경정 기록 관리, 통계적 활용에 매우 유용합니다. 경정 팬과 관계자 모두에게 중요한 정보 자원으로 활용됩니다.",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-대상경정 연도별 순위정보_GW"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_OD_API_WEB_BOAT_GRND_PRIZE",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/todz_api_web_grnd_prize_i": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/api_web_grnd_prize_i-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/api_web_grnd_prize_i-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "대상경정 연도별순위정보 조회",
+        "description": "조회년도를 이용해 기금조성총괄본부에서 진행된 대상경정 연도별순위정보를 조회하는 기능",
+        "operationId": "todz_api_web_grnd_prize_i",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "api_web_grnd_prize_i-item": {
+      "type": "object",
+      "properties": {
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "title_nm": {
+          "type": "string",
+          "description": "제목명"
+        },
+        "racer_rank1_no": {
+          "type": "string",
+          "description": "1위선수번호"
+        },
+        "racer_rank2_no": {
+          "type": "string",
+          "description": "2위선수번호"
+        },
+        "racer_rank3_no": {
+          "type": "string",
+          "description": "3위선수번호"
+        },
+        "created_dt": {
+          "type": "string",
+          "description": "생성일시"
+        },
+        "updt_dt": {
+          "type": "string",
+          "description": "수정일시"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "api_web_grnd_prize_i-header": {
+      "type": "object",
+      "properties": {
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        },
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        }
+      }
+    },
+    "api_web_grnd_prize_i-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/api_web_grnd_prize_i-items"
+        }
+      }
+    },
+    "api_web_grnd_prize_i-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/api_web_grnd_prize_i-item"
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_OD_API_WEB_BOAT_GRND_PRIZE/todz_api_web_grnd_prize_i",
+      "oprtinNm": "대상경정 연도별순위정보 조회",
+      "oprtinDc": "조회년도를 이용해 기금조성총괄본부에서 진행된 대상경정 연도별순위정보를 조회하는 기능",
+      "gwSvcNm": "todz_api_web_grnd_prize_i",
+      "operationId": "todz_api_web_grnd_prize_i",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_yr",
+          "paramtrDc": "경기연도",
+          "paramtrBassValue": "2019",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "paramtrDefNm": "#/definitions/api_web_grnd_prize_i-header",
+          "subDefNm": "api_web_grnd_prize_i-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "paramtrDefNm": "#/definitions/api_web_grnd_prize_i-body",
+          "subDefNm": "api_web_grnd_prize_i-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        }
+      ]
+    }
+  ]
+}

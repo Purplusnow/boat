@@ -1,0 +1,1119 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "서울올림픽기념국민체육진흥공단 경륜경정총괄본부에서 제공하는 경정운영정보는 경정부품정보, 소모품정보, 장비정비이력, 틸트각 정보, 출주선수 면담 내용 등을 조회할 수 있는 복합 API 서비스입니다. 특히 틸트각은 모터가 보트에 부착되는 각도를 의미하며, 기본값은 0도입니다. 숫자가 커질수록 직진 성능이 향상되지만 선회 시 안정성은 감소하는 특징이 있습니다. 선수들은 보통 -0.5도에서 1.5도 사이로 틸트각을 조절하며, 이를 통해 각기 다른 전법과 경기 전략을 구사합니다. 이러한 틸트각 정보는 경기 흐름 예측과 선수들의 전법 분석에 매우 유용하며, 팬과 관계자 모두가 선수들의 전략을 보다 명확히 이해하는 데 도움을 줍니다. 장비 상태와 정비 이력 등도 함께 제공되어 선수와 팀의 경기 준비 상황을 종합적으로 파악할 수 있습니다",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-운영 정보_GW"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_OD_API_MRA_SUPP_CD",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/todz_api_mra_parts_master_i": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/api_mra_parts_master_i-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/api_mra_parts_master_i-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 부품정보 목록 조회",
+        "description": "경정 부품명을 이용해 경정 운영에 사용되는 경정 부품의 규격과 명칭 정보를 조회하는 기능",
+        "operationId": "todz_api_mra_parts_master_i",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "parts_item_cd_nm",
+          "description": "품명",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    },
+    "/todz_api_mra_supp_cd_i": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/api_mra_supp_cd_i-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/api_mra_supp_cd_i-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 소모품정보 목록 조회",
+        "description": "소모품명 검색조건을 지정하여 경륜사업에 사용되는 소모품 정보를 조회하는 기능",
+        "operationId": "todz_api_mra_supp_cd_i",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "supp_nm",
+          "description": "소모품명",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    },
+    "/todz_api_mra_equip_repr_h": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/api_mra_equip_repr_h-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/api_mra_equip_repr_h-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 장비정비이력 목록조회",
+        "description": "검색년도, 장비유형, 주요 부품명을 검색조건을 지정하여 경정 운영 장비 정비이력 정보를 조회하는 기능",
+        "operationId": "todz_api_mra_equip_repr_h",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "equip_tpe_nm",
+          "description": "장비유형명",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "mjr_parts_nm",
+          "description": "주요부품명",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    },
+    "/TODZ_API_MRA_RACER_TILT_I": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/API_MRA_RACER_TILT_I-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/API_MRA_RACER_TILT_I-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 틸트각 정보 목록 조회",
+        "description": "년도, 회차, 일차, 경주번호 등의 검색조건을 지정하여 경정 운영 틸트각(조정각)의 정보를 조회 기능",
+        "operationId": "TODZ_API_MRA_RACER_TILT_I",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "week_tcnt",
+          "description": "등록회차수",
+          "type": "number",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "day_tcnt",
+          "description": "경기회차수",
+          "type": "number",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "racer_no",
+          "description": "선수번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "race_no",
+          "description": "경주번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    },
+    "/TODZ_API_MAR_RACER_INTERVIEW_I": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다.."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "$ref": "#/definitions/API_MAR_RACER_INTERVIEW_I-header"
+                },
+                "body": {
+                  "$ref": "#/definitions/API_MAR_RACER_INTERVIEW_I-body"
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 출주선수면담 목록 조회",
+        "description": "년도, 회차, 선수번호 등의 검색조건을 지정하여 경정 입소 출주선수 명단 정보를 조회하는 기능",
+        "operationId": "TODZ_API_MAR_RACER_INTERVIEW_I",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_yr",
+          "description": "경기연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "week_tcnt",
+          "description": "등록회차수",
+          "type": "number",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "racer_no",
+          "description": "선수번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "     api_mra_racer_i-body": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/api_mra_racer_i-items"
+        },
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        }
+      }
+    },
+    "api_mra_equip_repr_h-body": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/api_mra_equip_repr_h-items"
+        },
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        }
+      }
+    },
+    "api_mra_equip_repr_h-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/api_mra_equip_repr_h-item"
+        }
+      }
+    },
+    "api_mra_equip_repr_h-item": {
+      "type": "object",
+      "properties": {
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "repr_ymd": {
+          "type": "string",
+          "description": "정비일자"
+        },
+        "equip_tpe_nm": {
+          "type": "string",
+          "description": "장비유형명"
+        },
+        "repr_tpe_nms_yr": {
+          "type": "string",
+          "description": "경주정비유형연도"
+        },
+        "mjr_parts_nm": {
+          "type": "string",
+          "description": "주요부품명"
+        },
+        "repr_desc_cn": {
+          "type": "string",
+          "description": "정비내용"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "api_mra_equip_repr_h-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "api_mra_parts_master_i-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "api_mra_parts_master_i-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/api_mra_parts_master_i-items"
+        }
+      }
+    },
+    "api_mra_parts_master_i-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/api_mra_parts_master_i-item"
+        }
+      }
+    },
+    "api_mra_parts_master_i-item": {
+      "type": "object",
+      "properties": {
+        "parts_item_cd_nm": {
+          "type": "string",
+          "description": "품명"
+        },
+        "supp_spec_nm": {
+          "type": "string",
+          "description": "소모품규격명"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "api_mra_supp_cd_i-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "api_mra_supp_cd_i-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/api_mra_supp_cd_i-items"
+        }
+      }
+    },
+    "api_mra_supp_cd_i-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/api_mra_supp_cd_i-item"
+        }
+      }
+    },
+    "api_mra_supp_cd_i-item": {
+      "type": "object",
+      "properties": {
+        "supp_nm": {
+          "type": "string",
+          "description": "소모품명"
+        },
+        "supp_spec_nm": {
+          "type": "string",
+          "description": "소모품규격명"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "SC_Accommodation_item": {
+      "type": "object",
+      "properties": {
+        "room": {
+          "type": "number",
+          "description": "업소내 이용가능한 총 객실수"
+        },
+        "parkingSpot": {
+          "type": "string",
+          "description": "주차가능 여부"
+        },
+        "hotelName": {
+          "type": "string",
+          "description": "숙박시설 상호명"
+        },
+        "rprsTelno": {
+          "type": "number",
+          "description": "숙박시설 연락처"
+        },
+        "altTelno": {
+          "type": "number",
+          "description": "숙박시설 안심번호"
+        },
+        "lGubun": {
+          "type": "string",
+          "description": "언어구분"
+        },
+        "regionAddr": {
+          "type": "string",
+          "description": "지역명 표시"
+        },
+        "zip": {
+          "type": "number",
+          "description": "우편번호 정보"
+        },
+        "roadnmAddr": {
+          "type": "string",
+          "description": "숙박시설 도로명주소"
+        },
+        "lotnoAddr": {
+          "type": "string",
+          "description": "숙박시설 지번주소"
+        },
+        "lat": {
+          "type": "number",
+          "description": "위치정보(위도)"
+        },
+        "lot": {
+          "type": "number",
+          "description": "위치정보(경도)"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "SC_Accommodation_body": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/SC_Accommodation_items"
+        }
+      }
+    },
+    "SC_Accommodation_items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/SC_Accommodation_item"
+        }
+      }
+    },
+    "SC_Accommodation_header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        },
+        "totalCount": {
+          "type": "number",
+          "description": "전체 결과 수"
+        },
+        "pageIndex": {
+          "type": "number",
+          "description": "페이지 번호"
+        },
+        "pageUnit": {
+          "type": "number",
+          "description": "전체 페이지 수"
+        },
+        "searchCondition": {
+          "type": "string",
+          "description": "검색조건"
+        },
+        "searchKeyword": {
+          "type": "string",
+          "description": "검색키워드"
+        }
+      }
+    },
+    "API_MRA_RACER_TILT_I-item": {
+      "type": "object",
+      "properties": {
+        "race_no": {
+          "type": "string",
+          "description": "경주번호"
+        },
+        "tilt_val": {
+          "type": "string",
+          "description": "조정각값"
+        },
+        "jacket_add_wght": {
+          "type": "string",
+          "description": "부과량자켓중량"
+        },
+        "boat_add_wght_cn": {
+          "type": "string",
+          "description": "보트부과량내용"
+        },
+        "body_wght": {
+          "type": "number",
+          "description": "경주별체중량"
+        },
+        "day_tcnt": {
+          "type": "number",
+          "description": "경기회차수"
+        },
+        "week_tcnt": {
+          "type": "number",
+          "description": "등록회차수"
+        },
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "racer_no": {
+          "type": "string",
+          "description": "선수번호"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "API_MRA_RACER_TILT_I-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    },
+    "API_MRA_RACER_TILT_I-body": {
+      "type": "object",
+      "properties": {
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        },
+        "items": {
+          "$ref": "#/definitions/API_MRA_RACER_TILT_I-items"
+        }
+      }
+    },
+    "API_MRA_RACER_TILT_I-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/API_MRA_RACER_TILT_I-item"
+        }
+      }
+    },
+    "API_MAR_RACER_INTERVIEW_I-body": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/API_MAR_RACER_INTERVIEW_I-items"
+        },
+        "pageNo": {
+          "type": "string",
+          "description": "페이지번호"
+        },
+        "totalCount": {
+          "type": "string",
+          "description": "전체 결과 수"
+        },
+        "numOfRows": {
+          "type": "string",
+          "description": "한 페이지 결과 수"
+        }
+      }
+    },
+    "API_MAR_RACER_INTERVIEW_I-items": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "#/definitions/API_MAR_RACER_INTERVIEW_I-item"
+        }
+      }
+    },
+    "API_MAR_RACER_INTERVIEW_I-item": {
+      "type": "object",
+      "properties": {
+        "stnd_yr": {
+          "type": "string",
+          "description": "경기연도"
+        },
+        "week_tcnt": {
+          "type": "number",
+          "description": "등록회차수"
+        },
+        "racer_no": {
+          "type": "string",
+          "description": "선수번호"
+        },
+        "heal_stat_cn": {
+          "type": "string",
+          "description": "건강상태내용"
+        },
+        "trng_stat_cn": {
+          "type": "string",
+          "description": "훈련상태내용"
+        },
+        "row_num": {
+          "type": "string",
+          "description": "순번"
+        }
+      }
+    },
+    "API_MAR_RACER_INTERVIEW_I-header": {
+      "type": "object",
+      "properties": {
+        "resultCode": {
+          "type": "string",
+          "description": "결과코드"
+        },
+        "resultMsg": {
+          "type": "string",
+          "description": "결과메시지"
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_OD_API_MRA_SUPP_CD/TODZ_API_MAR_RACER_INTERVIEW_I",
+      "oprtinNm": "경정 출주선수면담 목록 조회",
+      "oprtinDc": "년도, 회차, 선수번호 등의 검색조건을 지정하여 경정 입소 출주선수 명단 정보를 조회하는 기능",
+      "gwSvcNm": "TODZ_API_MAR_RACER_INTERVIEW_I",
+      "operationId": "TODZ_API_MAR_RACER_INTERVIEW_I",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_yr",
+          "paramtrDc": "경기연도",
+          "paramtrBassValue": "2019",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "week_tcnt",
+          "paramtrDc": "등록회차수",
+          "paramtrBassValue": "12",
+          "paramtrTy": "number",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "racer_no",
+          "paramtrDc": "선수번호",
+          "paramtrBassValue": "01-031",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "paramtrDefNm": "#/definitions/API_MAR_RACER_INTERVIEW_I-header",
+          "subDefNm": "API_MAR_RACER_INTERVIEW_I-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "paramtrDefNm": "#/definitions/API_MAR_RACER_INTERVIEW_I-body",
+          "subDefNm": "API_MAR_RACER_INTERVIEW_I-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,547 @@
+/* 경정 예측 — 개인 참고용 화면.
+ *
+ * 표를 읽는 화면이므로 장식보다 밀도와 대비를 우선한다. 숫자는 전부 오른쪽
+ * 정렬하고 등폭 숫자를 써서 자릿수가 흔들리지 않게 한다 — 여섯 줄짜리 표에서
+ * 확률이 세로로 안 맞으면 훑어보기가 안 된다.
+ */
+
+:root {
+  --bg: #fbfbfa;
+  --panel: #ffffff;
+  --ink: #1a1a19;
+  --dim: #6b6b68;
+  --line: #e3e3e0;
+  --accent: #1b6ac9;
+  --plus: #0f7a44;
+  --minus: #b4331f;
+  --hit-bg: #e8f5ec;
+  --warn-bg: #fdf5e6;
+  --sunken: #eeeeec;   /* 지나간 것 — 카드가 가라앉아 보이는 표면 */
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16171a;
+    --panel: #1e2024;
+    --ink: #e8e8e6;
+    --dim: #9a9a97;
+    --line: #32353b;
+    --accent: #6aa9f0;
+    --plus: #4fc98a;
+    --minus: #f08573;
+    --hit-bg: #1c3328;
+    --warn-bg: #332c1a;
+    --sunken: #151719;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+        "Pretendard", "Malgun Gothic", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+
+/* ── 헤더 ─────────────────────────────────────────────── */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+  position: sticky; top: 0; z-index: 10;
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding-top: 10px; padding-bottom: 10px;
+}
+.brand { display: flex; align-items: center; gap: 10px; color: inherit; }
+.brand:hover { text-decoration: none; }
+.brand-mark { font-size: 26px; }
+.brand-text strong { display: block; font-size: 16px; }
+.brand-text small { display: block; color: var(--dim); font-size: 12px; }
+.nav { display: flex; gap: 4px; }
+.nav a {
+  padding: 6px 12px; border-radius: 999px; color: var(--dim); font-size: 14px;
+}
+.nav a:hover { background: var(--bg); text-decoration: none; }
+.nav a.on { background: var(--accent); color: #fff; }
+
+/* ── 본문 ─────────────────────────────────────────────── */
+main { padding: 24px 16px 48px; }
+h1 { font-size: 26px; margin: 0 0 8px; letter-spacing: -.02em; }
+h2 { font-size: 17px; margin: 0 0 10px; letter-spacing: -.01em; }
+h3 { font-size: 14px; margin: 22px 0 8px; color: var(--dim);
+     text-transform: none; letter-spacing: .02em; }
+
+.lede { color: var(--dim); margin: 0 0 20px; max-width: 62ch; }
+.note { color: var(--dim); font-size: 13px; margin: 0 0 12px; max-width: 74ch; }
+.fineprint { color: var(--dim); font-size: 12.5px; margin: 12px 0 0; max-width: 78ch; }
+.dim { color: var(--dim); }
+.strong { font-weight: 700; }
+.r { text-align: right; }
+.plus { color: var(--plus); }
+.minus { color: var(--minus); }
+
+.hero { margin-bottom: 24px; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.card h2 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+/* 제목 옆 개최일 — 제목만큼 크면 무엇이 제목인지 흐려진다. */
+.card h2 .hsub { font-size: 13.5px; font-weight: 600; color: var(--accent); }
+.card h2 .count { font-size: 12px; color: var(--dim); font-weight: 400; }
+.card.empty { text-align: center; color: var(--dim); }
+.card.callout { border-left: 3px solid var(--minus); }
+
+/* ── 지표 카드 ────────────────────────────────────────── */
+.stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px; margin: 16px 0 0;
+}
+.stat {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 12px 14px;
+}
+.stat b { display: block; font-size: 24px; font-variant-numeric: tabular-nums;
+          letter-spacing: -.02em; }
+.stat span { display: block; font-size: 12.5px; color: var(--dim); margin-top: 2px; }
+.stat small { display: block; font-size: 11.5px; color: var(--dim); margin-top: 4px; }
+
+/* ── 표 ───────────────────────────────────────────────── */
+.scroll { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th {
+  text-align: left; font-weight: 600; font-size: 12px; color: var(--dim);
+  border-bottom: 1px solid var(--line); padding: 8px 8px; white-space: nowrap;
+}
+.tbl td {
+  padding: 9px 8px; border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums; vertical-align: middle;
+}
+.tbl tbody tr:last-child td { border-bottom: 0; }
+.tbl tr.total td { font-weight: 700; border-top: 2px solid var(--line); }
+.tbl tr.winner { background: var(--hit-bg); }
+.tbl td small { display: block; font-size: 11px; color: var(--dim); font-weight: 400; }
+.tbl td small.bad { color: var(--minus); display: inline; margin-left: 4px; }
+.tbl-card td { padding: 8px 6px; }
+.c-no a { font-weight: 700; }
+.c-name { min-width: 84px; }
+.c-time, .c-no { white-space: nowrap; }
+
+/* ── 정번 배지 ─────────────────────────────────────────────
+ * 실제 艇 색을 배경으로 쓰고 **숫자를 그대로 크게** 적는다.
+ * 보트 모양 위에 숫자를 얹는 방식은 선체가 좁고 어두운 정번(2 흑·4 청·6 녹)
+ * 에서 숫자가 묻혀 읽히지 않았다. 표에서 필요한 것은 장식이 아니라 식별이다.
+ * 색만으로는 색각 이상에서 3(적)과 6(녹)이 섞이므로 숫자가 곧 본문이다. */
+.lane-no {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: none; border-radius: 6px; font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em;
+  background: var(--hull); color: var(--ink-on);
+  border: 1px solid var(--edge);
+}
+.ln-xs { width: 18px; height: 18px; font-size: 11.5px; border-radius: 4px;
+         margin-right: 5px; vertical-align: -3px; }
+.ln-s  { width: 24px; height: 24px; font-size: 14px; }
+.ln-m  { width: 30px; height: 30px; font-size: 17px; border-radius: 7px; }
+
+/* 실제 경정정 색. 1 백 · 2 흑 · 3 적 · 4 청 · 5 황 · 6 녹.
+   흰·노란 배경에는 검은 숫자, 나머지는 흰 숫자를 쓴다. */
+.lane-1 { --hull: #ffffff; --ink-on: #16181c; --edge: rgba(0,0,0,.35); }
+.lane-2 { --hull: #23262b; --ink-on: #ffffff; --edge: rgba(0,0,0,.35); }
+.lane-3 { --hull: #d8342a; --ink-on: #ffffff; --edge: rgba(0,0,0,.2); }
+.lane-4 { --hull: #1f5ec4; --ink-on: #ffffff; --edge: rgba(0,0,0,.2); }
+.lane-5 { --hull: #f2c521; --ink-on: #16181c; --edge: rgba(0,0,0,.28); }
+.lane-6 { --hull: #248f4a; --ink-on: #ffffff; --edge: rgba(0,0,0,.2); }
+
+@media (prefers-color-scheme: dark) {
+  .lane-1 { --edge: rgba(255,255,255,.4); }
+  .lane-2 { --hull: #2b2f36; --edge: rgba(255,255,255,.45); }
+}
+
+/* 선수 등급 */
+.grd { font-size: 11.5px; padding: 1px 6px; border-radius: 4px;
+       border: 1px solid var(--line); color: var(--dim); white-space: nowrap; }
+.grd-A1 { border-color: var(--minus); color: var(--minus); font-weight: 700; }
+.grd-A2 { border-color: var(--accent); color: var(--accent); }
+
+/* 착순 */
+.ord { display: inline-block; min-width: 20px; text-align: center;
+       font-weight: 700; border-radius: 4px; padding: 0 4px; }
+.ord-1 { background: var(--plus); color: #fff; }
+.ord-2 { background: var(--line); }
+.ord-3 { background: var(--line); }
+
+.mark { font-size: 15px; }
+.hit { display: inline-block; background: var(--plus); color: #fff;
+       font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-left: 4px; }
+.miss { color: var(--dim); font-size: 12px; }
+
+.badge { font-size: 10.5px; padding: 1px 6px; border-radius: 4px;
+         vertical-align: middle; margin-left: 4px; white-space: nowrap; }
+.badge-live { background: var(--plus); color: #fff; }
+.badge-oos { background: var(--line); color: var(--dim); }
+
+.chip { display: inline-block; font-size: 11.5px; color: var(--dim);
+        border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+.chip-link:hover { border-color: var(--accent); color: var(--accent);
+                   text-decoration: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ── 조각들 ───────────────────────────────────────────── */
+.crumb { font-size: 13px; color: var(--dim); margin-bottom: 10px; }
+.race-head { margin-bottom: 16px; }
+.race-head h1 { display: flex; align-items: center; gap: 8px; }
+.race-head .meta { color: var(--dim); font-size: 13.5px; margin: 0; }
+
+.outcome.ok { border-left: 3px solid var(--plus); }
+.outcome.no { border-left: 3px solid var(--line); }
+.outcome p { margin: 0; }
+
+.warn-inline {
+  background: var(--warn-bg); border-radius: 8px; padding: 10px 12px;
+  font-size: 13px; margin: 12px 0 0;
+}
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px;
+          color: var(--dim); }
+.legend.small { margin-top: 12px; font-size: 12px; }
+
+.combos { list-style: none; padding: 0; margin: 0; }
+.combos li { padding: 7px 0; border-bottom: 1px solid var(--line);
+             display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.combos li:last-child { border-bottom: 0; }
+.combos b { min-width: 62px; font-size: 13px; }
+.combos code { font-size: 15px; font-weight: 700; }
+
+.prose { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--dim); }
+.prose li { margin-bottom: 8px; }
+.prose b { color: var(--ink); }
+
+.empty-inline { color: var(--dim); font-size: 13.5px; margin: 8px 0 0; }
+
+/* ── 푸터 ─────────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--line); padding: 20px 0 40px;
+  color: var(--dim); font-size: 12.5px;
+}
+.site-footer p { margin: 0 0 8px; max-width: 80ch; }
+.site-footer .warn { background: var(--warn-bg); color: var(--ink);
+                     padding: 10px 12px; border-radius: 8px; }
+.site-footer .built { font-size: 11.5px; }
+
+@media (max-width: 640px) {
+  h1 { font-size: 21px; }
+  .header-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .tbl { font-size: 12.5px; }
+  .brand-text small { display: none; }
+}
+
+/* ── 차트 ─────────────────────────────────────────────────
+ * 팔레트는 dataviz 검증기(scripts/validate_palette.js)를 통과한 카테고리
+ * 슬롯 1·2·3 이다. 라이트 모드에서 aqua(#1baf7a)가 대비 3:1 미만이라
+ * **직접 라벨을 반드시 단다**(relief rule) — 템플릿에서 계열 끝에 이름을 찍는다.
+ * 다크 값은 자동 반전이 아니라 다크 표면에 맞춰 따로 고른 단계다.
+ */
+.viz-root {
+  --surface-1: var(--panel);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .viz-root {
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+  }
+}
+:root[data-theme="dark"] .viz-root {
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+}
+
+.chart-fig { margin: 0 0 14px; }
+.chart-fig figcaption {
+  font-size: 12.5px; color: var(--dim); margin-bottom: 6px;
+}
+.chart { width: 100%; min-width: 560px; height: auto; display: block; }
+/* 격자와 축은 물러나야 한다. 데이터보다 눈에 띄면 읽기를 방해한다. */
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .baseline { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 4 3; opacity: .7; }
+.chart .axis { font-size: 10.5px; fill: var(--dim); }
+.chart .unit { font-weight: 600; }
+.chart .slabel { font-size: 11px; fill: var(--ink); font-weight: 600; }
+.chart .r-anchor { text-anchor: end; }
+.chart .m-anchor { text-anchor: middle; }
+.chart .crosshair { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .tipbox { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+.chart .tiphead { font-size: 11px; fill: var(--dim); }
+.chart .tiptext { font-size: 11.5px; fill: var(--ink); }
+.chart .tipval { font-size: 11.5px; fill: var(--ink); font-weight: 600; }
+
+.swatch {
+  display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+  margin-right: 5px; vertical-align: middle;
+}
+
+.formula {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 12px 14px; font-size: 14px; text-align: center; margin: 0 0 12px;
+}
+
+/* ── 상세예상지 ───────────────────────────────────────────── */
+/* 예상판 — 확률을 막대로 함께 보여준다. 숫자만으로는 1순위와 2순위의
+   격차가 큰 경주와 접전 경주를 한눈에 구분할 수 없다. */
+.board { display: flex; flex-direction: column; gap: 2px; }
+.board-row {
+  display: grid; grid-template-columns: 26px 30px minmax(96px, 1fr) 3fr 58px;
+  align-items: center; gap: 10px; padding: 7px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.board-row:last-child { border-bottom: 0; }
+.board-row.is-top { background: var(--bg); border-radius: 6px; }
+.board-row .bname { font-size: 13.5px; }
+.board-row .bname small { display: block; font-size: 11px; color: var(--dim); }
+.board-row .bar { background: var(--line); border-radius: 4px; height: 9px; overflow: hidden; }
+.board-row .bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.board-row .bpct { text-align: right; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+
+/* 신뢰도 배지 */
+.conf { font-size: 11.5px; padding: 2px 8px; border-radius: 999px;
+        border: 1px solid var(--line); color: var(--dim); margin-left: 6px; }
+.conf-강승부 { border-color: var(--plus); color: var(--plus); font-weight: 700; }
+.conf-중승부 { border-color: var(--accent); color: var(--accent); }
+
+/* 전개 대본 — 장면마다 그 시점의 순서를 배지로 늘어놓는다. */
+.scenes { list-style: none; padding: 0; margin: 0 0 12px; }
+.scene { border-left: 2px solid var(--line); padding: 0 0 14px 14px; position: relative; }
+.scene:last-child { padding-bottom: 0; }
+.scene::before {
+  content: ""; position: absolute; left: -5px; top: 4px;
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+}
+.scene-head { font-size: 13px; margin-bottom: 6px; }
+.scene-text { font-size: 13px; color: var(--dim); margin: 6px 0 0; }
+.order-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.ob { display: inline-flex; align-items: center; gap: 4px; font-size: 12px;
+      border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px 2px 4px; }
+.ob .rank { font-style: normal; font-size: 10px; color: var(--dim); width: 12px;
+            text-align: center; }
+.tactic { font-size: 13.5px; background: var(--bg); border-radius: 8px;
+          padding: 10px 12px; margin: 0 0 12px; }
+
+/* 체크 포인트 */
+.focus-grid { display: grid; gap: 8px;
+              grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.focus { border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; }
+.focus .flabel { display: block; font-size: 11.5px; color: var(--dim); }
+.focus .fval { display: flex; align-items: center; gap: 6px; font-size: 13.5px;
+               margin-top: 3px; }
+
+/* 최근 전적 띠 — 숫자를 나열하면 안 읽힌다. 1·2착만 진하게 해서
+   '요즘 되는 선수'가 눈에 먼저 들어오게 한다. */
+.forms { display: flex; flex-direction: column; gap: 2px; }
+.form-row {
+  display: grid; grid-template-columns: 24px 24px minmax(96px, 150px) 1fr 74px;
+  align-items: center; gap: 10px; padding: 6px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.form-row:last-child { border-bottom: 0; }
+.form-row .bname { font-size: 13.5px; }
+.form-row .bname small { display: block; font-size: 11px; color: var(--dim); }
+.band { display: flex; gap: 3px; }
+.band i {
+  font-style: normal; font-size: 11.5px; width: 19px; height: 19px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 4px; background: var(--bg); color: var(--dim);
+  border: 1px solid var(--line);
+}
+.band i.r1 { background: var(--plus); color: #fff; border-color: transparent; font-weight: 700; }
+.band i.r2 { background: var(--hit-bg); color: var(--ink); border-color: var(--plus); }
+.favg { font-size: 11.5px; color: var(--dim); text-align: right;
+        font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .board-row { grid-template-columns: 22px 30px 1fr 44px; }
+  .board-row .bar { display: none; }
+  .form-row { grid-template-columns: 20px 24px 1fr; }
+  .form-row .band, .form-row .favg { grid-column: 1 / -1; }
+}
+
+}
+
+
+
+/* ── 주행 재생기 ──────────────────────────────────────────── */
+.player { position: relative; margin: 0 0 16px; }
+.rp-canvas {
+  display: block; width: 100%; border-radius: 10px;
+  border: 1px solid var(--line); background: #dff0fa; touch-action: pan-y;
+}
+/* 순위판 — 캔버스 **위쪽 가로 띠**. 화면에 겹쳐 놓으면 정작 봐야 할 선회
+   장면을 가린다. 가로로 늘어놓으면 겹치지 않으면서 눈이 한 번만 움직인다. */
+.rp-order {
+  display: flex; gap: 6px; margin: 0 0 8px; padding: 7px 8px;
+  list-style: none; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--bg); font-size: 12px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.rp-order::-webkit-scrollbar { display: none; }
+/* 두 줄. 윗줄은 순위·정번·이름, 아랫줄은 지금 상태(선회 밀림 각도).
+   각도만 적으면 무슨 각도인지 알 수 없어 이름을 함께 둔다. */
+.rp-order li {
+  display: flex; flex-direction: column; gap: 1px; white-space: nowrap;
+  padding: 4px 9px; border-radius: 8px; background: var(--panel);
+  border: 1px solid var(--line); flex: none; min-width: 92px;
+}
+.rp-top { display: flex; align-items: center; gap: 4px; }
+.rp-calm { font-size: 10px; color: var(--dim); padding-left: 19px; }
+/* 선두는 눈에 먼저 들어와야 한다. */
+.rp-order li:first-child { border-color: var(--accent); font-weight: 600; }
+.rp-rank {
+  width: 15px; height: 15px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 10px;
+  background: var(--line); color: var(--dim); font-variant-numeric: tabular-nums;
+}
+.rp-order li:first-child .rp-rank { background: var(--accent); color: #fff; }
+.rp-chip {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 17px; height: 17px; border-radius: 4px; font-style: normal;
+  font-size: 11px; font-weight: 800; border: 1px solid rgba(0, 0, 0, .3);
+}
+/* 드리프트 각도 — 지금 밀리고 있는 배를 바로 알아보게 한다. */
+/* 선회 밀림 = 슬립각. 지금 밀리고 있는 배를 바로 알아보게 한다. */
+.rp-drift {
+  font-size: 10px; color: #e8552f; font-weight: 700; padding-left: 19px;
+}
+
+.rp-controls {
+  display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+}
+.rp-btn {
+  font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px;
+  border: 1px solid transparent; background: var(--accent); color: #fff;
+  cursor: pointer; min-width: 86px;
+}
+.rp-ghost { background: transparent; color: var(--dim); border-color: var(--line); }
+.rp-speed { display: inline-flex; border: 1px solid var(--line); border-radius: 999px;
+            overflow: hidden; }
+.rp-rate {
+  font: inherit; font-size: 12px; padding: 5px 11px; border: 0; cursor: pointer;
+  background: transparent; color: var(--dim);
+}
+.rp-rate.on { background: var(--line); color: var(--ink); font-weight: 600; }
+.rp-view {
+  font: inherit; font-size: 12px; padding: 5px 11px; border: 0; cursor: pointer;
+  background: transparent; color: var(--dim);
+}
+.rp-view.on { background: var(--line); color: var(--ink); font-weight: 600; }
+.rp-seek { flex: 1; min-width: 120px; accent-color: var(--accent); }
+.rp-clock { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums;
+            min-width: 92px; text-align: right; }
+
+@media (max-width: 640px) {
+  .rp-order { font-size: 11px; }
+  .rp-clock { display: none; }
+}
+
+/* ── 고배당 적중 카드 ─────────────────────────────────────────
+ * 적중률 표는 성실하지만 눈에 걸리지 않는다. 처음 온 사람이 한 번 더 볼 이유는
+ * '삼복승 38배가 맞았다' 같은 구체적인 장면이다. 배당을 주인공으로 세운다. */
+.hl-grid {
+  display: grid; gap: 9px;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+}
+.hl {
+  display: flex; flex-direction: column; gap: 2px; padding: 12px 13px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg); color: inherit; position: relative;
+}
+a.hl:hover { border-color: var(--accent); text-decoration: none; }
+.hl-odds {
+  font-size: 26px; font-weight: 800; letter-spacing: -.03em; line-height: 1.1;
+  color: var(--plus); font-variant-numeric: tabular-nums;
+}
+.hl-odds i { font-size: 13px; font-weight: 600; font-style: normal; margin-left: 1px; }
+.hl-bet {
+  align-self: flex-start; font-size: 11.5px; font-weight: 700; color: #fff;
+  background: var(--plus); border-radius: 999px; padding: 1px 8px; margin: 3px 0 5px;
+}
+.hl-meta { font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.hl-pick { font-size: 13px; display: flex; align-items: center; }
+
+
+/* ── 경주 카드 ─────────────────────────────────────────────
+ * 표가 아니라 카드다. 추천을 3정으로 늘리자 표에서는 오른쪽에 빈 공간이 남고
+ * 좁은 화면에서는 가로 스크롤이 생겼다. 카드는 폭이 모자라면 추천이 다음 줄로
+ * 흐르므로 어떤 화면에서도 넘치지 않는다. 카드 전체가 링크라 어디를 눌러도 된다.
+ */
+.ri-list { display: flex; flex-direction: column; gap: 6px; }
+.ri {
+  display: block; padding: 10px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--panel); color: inherit;
+}
+a.ri:hover { border-color: var(--accent); text-decoration: none; }
+
+.ri-head {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 7px;
+}
+.ri-no { font-size: 14.5px; letter-spacing: -.01em; }
+.ri-time {
+  font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums;
+}
+.ri-date { font-size: 12px; color: var(--dim); }
+/* 결과는 오른쪽 끝에 붙인다 — 눈이 한 줄을 훑고 끝에서 결론을 만난다. */
+.ri-hit { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+
+/* 추천 3정. 폭이 모자라면 여기서 줄바꿈된다. */
+.ri-picks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.pk {
+  display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+  font-size: 13.5px;
+}
+.pk .mark { font-size: 14px; }
+.pk-nm { font-weight: 500; }
+.pk small { color: var(--dim); font-variant-numeric: tabular-nums; }
+
+/* 발주 시각이 지난 경주. 목록에서 빼지는 않는다 — 그날 시간표를 이어서 볼 수
+   있어야 하고, 무엇을 밀었는지도 남아야 한다.
+
+   **글자를 흐리게 하는 대신 카드를 가라앉힌다.** 투명도를 낮추면 예상 내용까지
+   읽기 어려워지는데, 지난 경주에서 정작 확인하고 싶은 것이 그 내용이다. 표면을
+   한 단계 내리고 테두리를 지우면 앞으로 뛸 경주가 떠 보이면서도 글자는 그대로
+   읽힌다. */
+.ri.is-past {
+  background: var(--sunken);
+  border-color: transparent;
+  box-shadow: none;
+}
+.ri.is-past .pk-nm { font-weight: 400; }
+a.ri.is-past:hover { background: var(--panel); border-color: var(--accent); }
+.ri.is-past .ri-time::after {
+  content: "발주 종료"; margin-left: 6px; font-size: 11px;
+  color: var(--dim); font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .ri-picks { gap: 5px 10px; }
+  .pk { font-size: 12.5px; }
+}

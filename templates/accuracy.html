@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% from "_macros.html" import bet_table, lane_no with context %}
+
+{% block title %}적중률과 회수율 · {{ site.name }}{% endblock %}
+{% block description %}저장된 예측을 실제 결과·배당과 대조한 승식별 적중률과 회수율.{% endblock %}
+
+{% block content %}
+
+<h1>적중률과 회수율</h1>
+<p class="lede">
+  저장된 예상을 실제 착순·확정배당과 대조한 집계입니다. 확정배당이 아직
+  공개되지 않은 경주는 판정에서 제외합니다.
+</p>
+
+<section class="card callout">
+  <h2>맞히는 것과 버는 것은 다릅니다</h2>
+  <p>
+    모델의 단승 적중률은 1코스 고정 선택보다 {{ metrics.edge_win | pct }}p 높습니다.
+    그러나 <strong>어느 승식도 장기 회수율이 100%를 넘지 않습니다.</strong>
+    적중률 향상이 공제율(약 20~27%)을 상쇄하지 못하므로, 적중률만으로 이 표를
+    해석하면 안 됩니다.
+  </p>
+</section>
+
+{% for version in ['v1', 'v1-oos'] %}
+{% set rep = reports.get(version) %}
+{% set o = rep.overall if rep else none %}
+<section class="card">
+  <h2>
+    {{ version_label[version][0] }} 기록
+    <span class="badge badge-{{ 'live' if version == 'v1' else 'oos' }}">{{ version }}</span>
+  </h2>
+  <p class="note">{{ version_label[version][1] }}.</p>
+
+  {% if not o or not o.n_races %}
+    <p class="empty-inline">
+      아직 집계할 기록이 없습니다.
+      {% if version == 'v1' %}
+      발주 전 확정 저장한 예상의 경주가 종료되고 배당이 공개되면 집계됩니다.
+      그 전까지는 아래 <strong>과거 재현 기록</strong>을 참고하시기 바랍니다.
+      {% endif %}
+    </p>
+  {% else %}
+    <div class="stats">
+      <div class="stat"><b>{{ o.hit_win | pct }}</b><span>1순위 1착</span></div>
+      <div class="stat"><b>{{ o.hit_place | pct }}</b><span>1순위 2착 이내</span></div>
+      <div class="stat"><b>{{ o.hit_top3_has_winner | pct }}</b><span>상위 3정 안에 1착</span></div>
+      <div class="stat"><b class="{{ 'plus' if o.roi_win >= 1 else 'minus' }}">{{ o.roi_win | pct }}</b><span>단승 회수율</span></div>
+    </div>
+    <p class="fineprint">
+      {{ o.first_date }} ~ {{ o.last_date }} · {{ '{:,}'.format(o.n_races) }}경주
+      {% if o.avg_win_payout %}· 적중 시 평균 단승배당 {{ o.avg_win_payout | num(1) }}배{% endif %}
+    </p>
+
+    {% if rep.by_bet %}
+    <h3>승식별</h3>
+    {{ bet_table(rep.by_bet) }}
+    <p class="note">
+      회수율은 매 경주 균등 매수를 가정한 값입니다. 박스는 매수 수만큼 원금이
+      늘어나 분모에 반영되며, 승식이 아닌 매수 방식이므로 통합 회수율에서는
+      제외했습니다.
+    </p>
+    {% endif %}
+
+    {% if rep.by_lane %}
+    <h3>1순위로 고른 코스별</h3>
+    <table class="tbl">
+      <thead><tr><th>코스</th><th class="r">경주</th><th class="r">1착</th>
+                 <th class="r">2착 이내</th><th class="r">회수율</th></tr></thead>
+      <tbody>
+        {% for r in rep.by_lane | sort(attribute='lane') %}
+        <tr>
+          <td>{{ lane_no(r.lane, "s") }} 코스</td>
+          <td class="r">{{ '{:,}'.format(r.n_races) }}</td>
+          <td class="r">{{ r.hit_win | pct }}</td>
+          <td class="r">{{ r.hit_place | pct }}</td>
+          <td class="r {{ 'plus' if r.roi_win >= 1 else 'minus' }}">{{ r.roi_win | pct }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="note">
+      1코스 지목 시 적중률이 가장 높습니다. 인코스 최단거리 선회라는 경정의
+      구조적 특성과 일치합니다.
+    </p>
+    {% endif %}
+
+    {% if rep.monthly %}
+    <h3>월별</h3>
+    <p class="note">
+      회수율은 고배당 적중 1건의 영향이 오래 남아 누적값만으로는 추세를 알기
+      어렵습니다. 월 단위로 분리해 게시합니다.
+    </p>
+    <div class="scroll">
+    <table class="tbl">
+      <thead><tr><th>월</th><th class="r">경주</th><th class="r">1착</th>
+                 <th class="r">2착 이내</th><th class="r">회수율</th></tr></thead>
+      <tbody>
+        {% for m in rep.monthly | reverse %}
+        <tr>
+          <td>{{ m.month }}</td>
+          <td class="r">{{ '{:,}'.format(m.n_races) }}</td>
+          <td class="r">{{ m.hit_win | pct }}</td>
+          <td class="r">{{ m.hit_place | pct }}</td>
+          <td class="r {{ 'plus' if m.roi_win >= 1 else 'minus' }}">{{ m.roi_win | pct }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% endif %}
+  {% endif %}
+</section>
+{% endfor %}
+
+<section class="card">
+  <h2>어떻게 검증했나</h2>
+  <ul class="prose">
+    <li><b>시간순 교차검증</b> — 과거 구간으로 학습해 이후 경주를 예측합니다.
+      무작위 분할은 동일 경주의 다른 정이 학습에 포함되어 성능이 과대평가됩니다.</li>
+    <li><b>베이스라인 동시 측정</b> — 경정은 발주 전 배당률이 공개되지 않아
+      '1인기'를 기준으로 쓸 수 없습니다. 대신 <b>1코스 고정</b>
+      ({{ metrics.lane1_win | pct }})과 <b>최근 폼 최고</b>
+      ({{ metrics.form_win | pct }})를 같은 경주에서 함께 계산합니다.</li>
+    <li><b>예상 확정 저장</b> — 발주 시각이 지난 경주의 예상은 수정하지 않으며,
+      발주 시각이 확인되지 않는 경주는 예상을 생성하지 않습니다.</li>
+    <li><b>미공개 배당 제외</b> — 착순은 당일, 확정배당은 이후에 공개됩니다.
+      배당 미공개 구간을 불발로 계상하면 성적이 실제보다 낮게 산출됩니다.</li>
+    <li><b>표본 하한</b> — 구간별 집계는 {{ min_sample }}경주 미만이면 게시하지
+      않습니다.</li>
+  </ul>
+</section>
+
+{% endblock %}

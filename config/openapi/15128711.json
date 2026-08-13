@@ -1,0 +1,877 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "서울올림픽기념국민체육진흥공단에서 진행하는 경정사업 관련 통계자료로 연도, 경주일자, 선수이름 조회조건을 이용해 출발위반에 대한 정보를 제공합니다. 경정경주는 플라잉스타트, 온라인스타트 2가지 출발방식이 있습니다. 플라잉스타트는 경정만의 독특한 출발방식인 플라잉스타트는 6척의 모터보트가 전속력으로 대시계가 0초(12시방향)에서 1.0초를 가리키는 사이에 물위에 그려진 가상의 출발선을 통과합니다. 좀더 0초에 가까운 출발을 한 선수가 경주의 주도권을 쥡니다. 출발위반 횟수가 많은 선수는 경정경주에서 우승자 확률이 낮아지므로 참고하시기 바랍니다. \\n",
+    "version": "1.0.0",
+    "title": "서울올림픽기념국민체육진흥공단_경주사업총괄본부 경정-회차별 출발위반 현황 정보"
+  },
+  "host": "apis.data.go.kr/B551014/SRVC_MRA_FL_INFO",
+  "basePath": "",
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "paths": {
+    "/TODZ_MRA_FL_INFO": {
+      "get": {
+        "responses": {
+          "0": {
+            "description": "NORMAL SERVICE / 정상 수행 입니다."
+          },
+          "10": {
+            "description": "INVALID_REQUEST_PARAMETER_ERROR / 잘못된 요청 파라메터 에러"
+          },
+          "200": {
+            "description": "성공",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "header": {
+                  "type": "object",
+                  "description": "header",
+                  "properties": {
+                    "resultCode": {
+                      "type": "string",
+                      "description": "결과코드",
+                      "properties": {}
+                    },
+                    "resultMsg": {
+                      "type": "string",
+                      "description": "결과메세지",
+                      "properties": {}
+                    }
+                  }
+                },
+                "body": {
+                  "type": "object",
+                  "description": "body",
+                  "properties": {
+                    "items": {
+                      "type": "object",
+                      "description": "items",
+                      "properties": {
+                        "item": {
+                          "type": "object",
+                          "description": "item",
+                          "properties": {
+                            "row_num": {
+                              "type": "string",
+                              "description": "순번",
+                              "properties": {}
+                            },
+                            "stnd_year": {
+                              "type": "string",
+                              "description": "기준연도",
+                              "properties": {}
+                            },
+                            "mbr_nm": {
+                              "type": "string",
+                              "description": "경정장명",
+                              "properties": {}
+                            },
+                            "tms": {
+                              "type": "string",
+                              "description": "회차",
+                              "properties": {}
+                            },
+                            "day_ord": {
+                              "type": "string",
+                              "description": "일차",
+                              "properties": {}
+                            },
+                            "race_no": {
+                              "type": "string",
+                              "description": "경주번호",
+                              "properties": {}
+                            },
+                            "race_day": {
+                              "type": "string",
+                              "description": "경주일자",
+                              "properties": {}
+                            },
+                            "race_dgre_nm": {
+                              "type": "string",
+                              "description": "경주구분",
+                              "properties": {}
+                            },
+                            "race_dist": {
+                              "type": "string",
+                              "description": "경주거리",
+                              "properties": {}
+                            },
+                            "voil_nm": {
+                              "type": "string",
+                              "description": "판정(플라잉:F, 레이트:L)",
+                              "properties": {}
+                            },
+                            "racer_no": {
+                              "type": "string",
+                              "description": "선수번호",
+                              "properties": {}
+                            },
+                            "racer_nm": {
+                              "type": "string",
+                              "description": "선수이름",
+                              "properties": {}
+                            },
+                            "racer_grd": {
+                              "type": "string",
+                              "description": "선수등급",
+                              "properties": {}
+                            },
+                            "racer_perio": {
+                              "type": "string",
+                              "description": "선수기수",
+                              "properties": {}
+                            },
+                            "race_reg_no": {
+                              "type": "string",
+                              "description": "정번",
+                              "properties": {}
+                            },
+                            "entry_course": {
+                              "type": "string",
+                              "description": "코스",
+                              "properties": {}
+                            },
+                            "star_tm": {
+                              "type": "string",
+                              "description": "출발시간(FL안했을 때 start time)",
+                              "properties": {}
+                            },
+                            "weath_nm": {
+                              "type": "string",
+                              "description": "기상",
+                              "properties": {}
+                            },
+                            "tempt": {
+                              "type": "string",
+                              "description": "기온",
+                              "properties": {}
+                            },
+                            "wind_spd": {
+                              "type": "string",
+                              "description": "풍속",
+                              "properties": {}
+                            },
+                            "wind_dirc_nm": {
+                              "type": "string",
+                              "description": "풍향",
+                              "properties": {}
+                            },
+                            "humidity": {
+                              "type": "string",
+                              "description": "습도",
+                              "properties": {}
+                            },
+                            "water_tempt": {
+                              "type": "string",
+                              "description": "수온",
+                              "properties": {}
+                            },
+                            "water_lvl": {
+                              "type": "string",
+                              "description": "수위",
+                              "properties": {}
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "pageNo": {
+                      "type": "string",
+                      "description": "페이지번호",
+                      "properties": {}
+                    },
+                    "totalCount": {
+                      "type": "string",
+                      "description": "전체 결과 수",
+                      "properties": {}
+                    },
+                    "numOfRows": {
+                      "type": "string",
+                      "description": "한 페이지 결과 수",
+                      "properties": {}
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "response"
+              }
+            }
+          },
+          "301": {
+            "description": "INVALID REQUEST RESULT TYPE / 잘못된 결과형태 요청"
+          },
+          "334": {
+            "description": "START PAGE NUMBER GREATER THAN LAST PAGE NUMBER / 시작 페이지 숫자가 끝 페이지 숫자보다 큼"
+          },
+          "336": {
+            "description": "CANNOT REQUEST MORE THAN 1000 DATA AT A TIME / 한번에 1000건 이상의 요청은 할 수 없음"
+          },
+          "340": {
+            "description": "NO MANDATORY REQUEST PARAMETERS ERROR / 필수 요청 파라미터가 입력되지 않거나 부적절한 값이 입력되었음"
+          },
+          "500": {
+            "description": "INTERNAL_SERVER_ERROR / 내부 서버 오류"
+          },
+          "601": {
+            "description": "INVALID_OPEN_API_OPERATION_ERROR / 잘못된 오픈 API 작동 오류"
+          }
+        },
+        "tags": [
+          "API 목록"
+        ],
+        "summary": "경정 회차별 출발위반 현황 정보 조회",
+        "description": "연도, 경주일, 선수명 등의 조회조건을 이용하여 경정경주 회차별 출발위반 정보를 조회하는 기능",
+        "operationId": "TODZ_MRA_FL_INFO",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ]
+      },
+      "parameters": [
+        {
+          "name": "serviceKey",
+          "description": "공공데이터포털에서 받은 인증키",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "pageNo",
+          "description": "페이지번호",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "numOfRows",
+          "description": "한 페이지 결과 수",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "resultType",
+          "description": "결과형식",
+          "type": "string",
+          "required": true,
+          "in": "query"
+        },
+        {
+          "name": "stnd_year",
+          "description": "기준연도",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "tms",
+          "description": "회차",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "day_ord",
+          "description": "일차",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "race_no",
+          "description": "경주번호",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "startrace_day",
+          "description": "시작경주일자",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "endrace_day",
+          "description": "종료경주일자",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        },
+        {
+          "name": "racer_nm",
+          "description": "선수이름",
+          "type": "string",
+          "required": false,
+          "in": "query"
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "TODZ_MRA_FL_INFO_response": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "type": "object",
+          "description": "header",
+          "properties": {
+            "resultCode": {
+              "type": "string",
+              "description": "결과코드"
+            },
+            "resultMsg": {
+              "type": "string",
+              "description": "결과메세지"
+            }
+          }
+        },
+        "body": {
+          "type": "object",
+          "description": "body",
+          "properties": {
+            "items": {
+              "type": "object",
+              "description": "items",
+              "properties": {
+                "item": {
+                  "type": "object",
+                  "description": "item",
+                  "properties": {
+                    "row_num": {
+                      "type": "string",
+                      "description": "순번"
+                    },
+                    "stnd_year": {
+                      "type": "string",
+                      "description": "기준연도"
+                    },
+                    "mbr_nm": {
+                      "type": "string",
+                      "description": "경정장명"
+                    },
+                    "tms": {
+                      "type": "string",
+                      "description": "회차"
+                    },
+                    "day_ord": {
+                      "type": "string",
+                      "description": "일차"
+                    },
+                    "race_no": {
+                      "type": "string",
+                      "description": "경주번호"
+                    },
+                    "race_day": {
+                      "type": "string",
+                      "description": "경주일자"
+                    },
+                    "race_dgre_nm": {
+                      "type": "string",
+                      "description": "경주구분"
+                    },
+                    "race_dist": {
+                      "type": "string",
+                      "description": "경주거리"
+                    },
+                    "voil_nm": {
+                      "type": "string",
+                      "description": "판정(플라잉:F, 레이트:L)"
+                    },
+                    "racer_no": {
+                      "type": "string",
+                      "description": "선수번호"
+                    },
+                    "racer_nm": {
+                      "type": "string",
+                      "description": "선수이름"
+                    },
+                    "racer_grd": {
+                      "type": "string",
+                      "description": "선수등급"
+                    },
+                    "racer_perio": {
+                      "type": "string",
+                      "description": "선수기수"
+                    },
+                    "race_reg_no": {
+                      "type": "string",
+                      "description": "정번"
+                    },
+                    "entry_course": {
+                      "type": "string",
+                      "description": "코스"
+                    },
+                    "star_tm": {
+                      "type": "string",
+                      "description": "출발시간(FL안했을 때 start time)"
+                    },
+                    "weath_nm": {
+                      "type": "string",
+                      "description": "기상"
+                    },
+                    "tempt": {
+                      "type": "string",
+                      "description": "기온"
+                    },
+                    "wind_spd": {
+                      "type": "string",
+                      "description": "풍속"
+                    },
+                    "wind_dirc_nm": {
+                      "type": "string",
+                      "description": "풍향"
+                    },
+                    "humidity": {
+                      "type": "string",
+                      "description": "습도"
+                    },
+                    "water_tempt": {
+                      "type": "string",
+                      "description": "수온"
+                    },
+                    "water_lvl": {
+                      "type": "string",
+                      "description": "수위"
+                    }
+                  }
+                }
+              }
+            },
+            "pageNo": {
+              "type": "string",
+              "description": "페이지번호"
+            },
+            "totalCount": {
+              "type": "string",
+              "description": "전체 결과 수"
+            },
+            "numOfRows": {
+              "type": "string",
+              "description": "한 페이지 결과 수"
+            }
+          }
+        }
+      }
+    }
+  },
+  "swaggerOprtinVOs": [
+    {
+      "oprtinUrl": "https://openapi.kspo.or.kr/web/service/SRVC_MRA_FL_INFO/TODZ_MRA_FL_INFO",
+      "oprtinNm": "경정 회차별 출발위반 현황 정보 조회",
+      "oprtinDc": "연도, 경주일, 선수명 등의 조회조건을 이용하여 경정경주 회차별 출발위반 정보를 조회하는 기능",
+      "gwSvcNm": "TODZ_MRA_FL_INFO",
+      "operationId": "TODZ_MRA_FL_INFO",
+      "publicDataTyDetailCode": "PRDE02",
+      "reqList": [
+        {
+          "paramtrNm": "serviceKey",
+          "paramtrDc": "공공데이터포털에서 받은 인증키",
+          "paramtrBassValue": "-",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "pageNo",
+          "paramtrDc": "페이지번호",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "numOfRows",
+          "paramtrDc": "한 페이지 결과 수",
+          "paramtrBassValue": "10",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "resultType",
+          "paramtrDc": "결과형식",
+          "paramtrBassValue": "XML",
+          "paramtrTy": "string",
+          "paramtrDivision": "필수",
+          "ck": true
+        },
+        {
+          "paramtrNm": "stnd_year",
+          "paramtrDc": "기준연도",
+          "paramtrBassValue": "2024",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "tms",
+          "paramtrDc": "회차",
+          "paramtrBassValue": "5",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "day_ord",
+          "paramtrDc": "일차",
+          "paramtrBassValue": "1",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "race_no",
+          "paramtrDc": "경주번호",
+          "paramtrBassValue": "05",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "startrace_day",
+          "paramtrDc": "시작경주일자",
+          "paramtrBassValue": "20240101",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "endrace_day",
+          "paramtrDc": "종료경주일자",
+          "paramtrBassValue": "20241231",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        },
+        {
+          "paramtrNm": "racer_nm",
+          "paramtrDc": "선수이름",
+          "paramtrBassValue": "나종호",
+          "paramtrTy": "string",
+          "paramtrDivision": "옵션",
+          "ck": true
+        }
+      ],
+      "resList": [
+        {
+          "paramtrNm": "header",
+          "paramtrDc": "header",
+          "arrayYn": "N",
+          "paramtrDefNm": "#/definitions/todz_mra_fl_i-header",
+          "subDefNm": "todz_mra_fl_i-header",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true,
+          "subParam": [
+            {
+              "paramtrNm": "resultCode",
+              "paramtrDc": "결과코드",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "resultMsg",
+              "paramtrDc": "결과메세지",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            }
+          ]
+        },
+        {
+          "paramtrNm": "body",
+          "paramtrDc": "body",
+          "arrayYn": "N",
+          "paramtrDefNm": "#/definitions/todz_mra_fl_i-body",
+          "subDefNm": "todz_mra_fl_i-body",
+          "paramtrTy": "object",
+          "paramtrDivision": "필수",
+          "ck": true,
+          "subParam": [
+            {
+              "paramtrNm": "items",
+              "paramtrDc": "items",
+              "arrayYn": "N",
+              "paramtrDefNm": "#/definitions/todz_mra_fl_i-items",
+              "subDefNm": "todz_mra_fl_i-items",
+              "paramtrTy": "object",
+              "paramtrDivision": "필수",
+              "ck": true,
+              "subParam": [
+                {
+                  "paramtrNm": "item",
+                  "paramtrDc": "item",
+                  "arrayYn": "N",
+                  "paramtrDefNm": "#/definitions/todz_mra_fl_i-item",
+                  "subDefNm": "todz_mra_fl_i-item",
+                  "paramtrTy": "object",
+                  "paramtrDivision": "필수",
+                  "ck": true,
+                  "subParam": [
+                    {
+                      "paramtrNm": "row_num",
+                      "paramtrDc": "순번",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "stnd_year",
+                      "paramtrDc": "기준연도",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "mbr_nm",
+                      "paramtrDc": "경정장명",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "tms",
+                      "paramtrDc": "회차",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "day_ord",
+                      "paramtrDc": "일차",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "race_no",
+                      "paramtrDc": "경주번호",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "race_day",
+                      "paramtrDc": "경주일자",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "race_dgre_nm",
+                      "paramtrDc": "경주구분",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "race_dist",
+                      "paramtrDc": "경주거리",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "voil_nm",
+                      "paramtrDc": "판정(플라잉:F, 레이트:L)",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_no",
+                      "paramtrDc": "선수번호",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_nm",
+                      "paramtrDc": "선수이름",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_grd",
+                      "paramtrDc": "선수등급",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "racer_perio",
+                      "paramtrDc": "선수기수",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "race_reg_no",
+                      "paramtrDc": "정번",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "entry_course",
+                      "paramtrDc": "코스",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "star_tm",
+                      "paramtrDc": "출발시간(FL안했을 때 start time)",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "weath_nm",
+                      "paramtrDc": "기상",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "tempt",
+                      "paramtrDc": "기온",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "wind_spd",
+                      "paramtrDc": "풍속",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "wind_dirc_nm",
+                      "paramtrDc": "풍향",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "humidity",
+                      "paramtrDc": "습도",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "water_tempt",
+                      "paramtrDc": "수온",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    },
+                    {
+                      "paramtrNm": "water_lvl",
+                      "paramtrDc": "수위",
+                      "arrayYn": "N",
+                      "paramtrDefNm": "",
+                      "paramtrTy": "string",
+                      "paramtrDivision": "옵션",
+                      "ck": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "paramtrNm": "pageNo",
+              "paramtrDc": "페이지번호",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "totalCount",
+              "paramtrDc": "전체 결과 수",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            },
+            {
+              "paramtrNm": "numOfRows",
+              "paramtrDc": "한 페이지 결과 수",
+              "arrayYn": "N",
+              "paramtrDefNm": "",
+              "paramtrTy": "string",
+              "paramtrDivision": "필수",
+              "ck": true
+            }
+          ]
+        }
+      ],
+      "oprtinNo": 1
+    }
+  ]
+}

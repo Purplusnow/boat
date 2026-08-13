@@ -1,0 +1,101 @@
+# 개최일에 맞춰 자료를 받아 사이트를 다시 굽고 GitHub Pages 로 올린다.
+#
+# 경정은 수·목에 시행하고 발주는 11:40~17:57 KST 다. 그래서 하루 두 번 돈다.
+#
+#   09:00 KST — 출주표가 올라온 뒤. 예상을 만들어 **발주 전에** 게시한다.
+#   22:30 KST — 경주가 모두 끝난 뒤. 착순·배당을 받아 적중률에 반영한다.
+#
+# 저녁 회차를 한 번에 처리하는 이유: 착순은 경주마다 들어오지만 배당은 그날
+# 늦게 한 번에 들어온다. 낮에 여러 번 돌리면 '착순은 있는데 적중은 모름' 인
+# 어중간한 화면이 오래 남는다.
+#
+# **크론은 UTC 다.** KST 는 +9 이므로 00:00 UTC = 09:00 KST.
+# GitHub 의 예약 실행은 몇 분에서 십수 분 늦을 수 있다. 09:00 을 고른 것은
+# 첫 발주(11:40)까지 여유를 두기 위해서다.
+name: 사이트 배포
+
+on:
+  schedule:
+    - cron: "0 0 * * 3,4"     # 수·목 09:00 KST — 예상 게시
+    - cron: "30 13 * * 3,4"   # 수·목 22:30 KST — 결과 반영
+  workflow_dispatch:           # 손으로도 돌릴 수 있게
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포는 한 번에 하나만. 앞 실행이 끝나기 전에 다음이 끼어들면 반쯤 만든
+# 사이트가 올라갈 수 있다.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: src
+  KBOAT_SERVICE_KEY: ${{ secrets.KBOAT_SERVICE_KEY }}
+  # 프로젝트 페이지는 user.github.io/<저장소>/ 아래에 놓인다. 모든 내부 링크가
+  # 이 경로로 시작해야 한다 — 비워 두면 전부 404 가 된다.
+  BOATAI_BASE: /${{ github.event.repository.name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # 수집 자료(약 140MB)는 저장소에 담지 않고 캐시로 나른다. 키에 run_id 를
+      # 넣어 매번 새로 저장하고, restore-keys 로 직전 것을 받아 온다.
+      - name: 수집 자료 캐시
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: boatai-db-${{ github.run_id }}
+          restore-keys: boatai-db-
+
+      # 캐시가 없으면(첫 실행·만료) 처음부터 만든다. 24년치 백필이 700회 남짓
+      # 호출이라 개발계정 일일 한도(1만) 안에 들어간다. 시간은 걸리지만 드물다.
+      - name: 자료 수집
+        run: |
+          if [ -f data/boatai.sqlite ]; then
+            python -m boatai.kboat.collect daily
+          else
+            echo "캐시 없음 — 처음부터 수집합니다"
+            python -m boatai.kboat.collect backfill
+            python -m boatai.predict backfill
+          fi
+          python -m boatai.kboat.collect prune
+
+      # 발주가 지나지 않은 경주에만 예상을 만든다. 이미 저장된 예상은 건드리지
+      # 않으므로 하루 두 번 돌려도 덮어쓰지 않는다.
+      - name: 예상 생성
+        run: python -m boatai.predict upcoming
+
+      # 자료 결손은 실패로 만들지 않는다 — 배당은 원래 늦게 들어오므로 저녁
+      # 실행에서도 일부는 비어 있다. 다만 로그에는 남겨 눈에 띄게 한다.
+      - name: 자료 점검
+        run: python -m boatai.audit --days 30 || true
+
+      - name: 사이트 빌드
+        run: python -m boatai.site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
