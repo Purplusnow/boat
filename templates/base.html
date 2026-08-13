@@ -36,6 +36,8 @@
 {# 광고·애널리틱스·검색엔진 태그는 두지 않는다. config.yaml 의 site.url 을
    채우면 canonical 이 붙는다. #}
 {% if site.url %}<link rel="canonical" href="{{ site.url }}{{ base }}{{ page_url }}">{% endif %}
+{% if verification.get('google') %}<meta name="google-site-verification" content="{{ verification.google }}">{% endif %}
+{% if verification.get('naver') %}<meta name="naver-site-verification" content="{{ verification.naver }}">{% endif %}
 <link rel="stylesheet" href="{{ base }}/static/style.css?v={{ assets.get('style.css', '1') }}">
 {% if adsense.get('client') %}
 {# 애드센스 로더. client 가 비어 있으면 스크립트 자체가 나가지 않는다 —

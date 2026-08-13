@@ -105,6 +105,12 @@ def _dict(row: sqlite3.Row) -> Dict:
     return {k: row[k] for k in row.keys()}
 
 
+def _iso(ymd: Optional[str]) -> Optional[str]:
+    """``"20260813"`` → ``"2026-08-13"``. 사이트맵의 lastmod 형식."""
+    s = str(ymd or "")
+    return f"{s[:4]}-{s[4:6]}-{s[6:8]}" if len(s) >= 8 and s[:8].isdigit() else None
+
+
 def fmt_date(ymd: Optional[str]) -> str:
     """``"20260813"`` → ``"2026-08-13 (목)"``"""
     if not ymd or len(str(ymd)) < 8:
@@ -458,6 +464,7 @@ def build(db: str, out: Path, cfg: Dict) -> None:
         "base": base,
         "adsense": cfg.get("adsense", {}) or {},
         "analytics": cfg.get("analytics", {}) or {},
+        "verification": cfg.get("verification", {}) or {},
     }
 
     with session(db) as conn:
@@ -576,6 +583,30 @@ def build(db: str, out: Path, cfg: Dict) -> None:
     _write(out / "accuracy" / "index.html", env.get_template("accuracy.html").render(
         reports=reports, metrics=metrics, min_sample=bcfg.get("min_sample", 30),
         page_url="/accuracy/", **ctx_base))
+
+    # ── 검색엔진용 ───────────────────────────────────────────────
+    #
+    # 사이트맵이 없으면 검색엔진은 첫 화면에서 링크를 타고만 들어온다. 경주
+    # 상세는 목록에서 밀려나면 링크가 끊기므로, 명시하지 않으면 색인되지 않는다.
+    site_url = cfg.get("site", {}).get("url") or ""
+    if site_url:
+        today_iso = today_kst().isoformat()
+        urls = [{"path": "/", "freq": "daily", "priority": "1.0", "lastmod": today_iso},
+                {"path": "/accuracy/", "freq": "weekly", "priority": "0.9", "lastmod": today_iso},
+                {"path": "/strategy/", "freq": "monthly", "priority": "0.7", "lastmod": today_iso},
+                {"path": "/results/", "freq": "daily", "priority": "0.8", "lastmod": today_iso}]
+        for ymd in sorted(days, reverse=True):
+            urls.append({"path": f"/day/{ymd}/", "freq": "monthly", "priority": "0.6",
+                         "lastmod": _iso(ymd) or today_iso})
+        for p_ in race_pages:
+            urls.append({"path": f"/race/{p_['race_key']}/", "freq": "monthly",
+                         "priority": "0.7", "lastmod": _iso(p_.get("race_ymd")) or today_iso})
+        _write(out / "sitemap.xml", env.get_template("sitemap.xml").render(
+            urls=urls, site=cfg.get("site", {}), base=base))
+        (out / "robots.txt").write_text(
+            "User-agent: *\nAllow: /\n\n"
+            f"Sitemap: {site_url}{base}/sitemap.xml\n", encoding="utf-8")
+        log.info("사이트맵 %d개 주소", len(urls))
 
     log.info("경주 상세 %d개 · 경주일 %d개 · 다가올 %d경주 · 결과 %d경주",
              len(race_pages), len(days), len(upcoming), len(finished))
