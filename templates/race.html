@@ -46,7 +46,11 @@
 
 {# ── 예상판 ────────────────────────────────────────────────── #}
 <section class="card">
-  <h2>AI 예상</h2>
+  <h2>예측 승률 <span class="count">머신러닝 모델</span></h2>
+  <p class="note">
+    출주표의 선수·모터·보트·코스 기록 88개 지표를 학습해 6정의 1착 확률을
+    산출합니다. 경주 안에서 합이 100%가 되도록 맞춘 값입니다.
+  </p>
   <div class="board">
     {% for r in race.runners | sort(attribute='pred_rank') %}
     <div class="board-row {{ 'is-top' if r.pred_rank == 1 else '' }}">

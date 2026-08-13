@@ -17,6 +17,7 @@
   --hit-bg: #e8f5ec;
   --warn-bg: #fdf5e6;
   --sunken: #eeeeec;   /* 지나간 것 — 카드가 가라앉아 보이는 표면 */
+  --fill: rgba(27, 106, 201, .17);  /* 확률만큼 채우는 반투명 톤 */
   --radius: 10px;
 }
 
@@ -33,6 +34,7 @@
     --hit-bg: #1c3328;
     --warn-bg: #332c1a;
     --sunken: #151719;
+    --fill: rgba(106, 169, 240, .24);
   }
 }
 
@@ -517,13 +519,29 @@ a.ri:hover { border-color: var(--accent); text-decoration: none; }
 .ri-picks {
   display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px;
 }
+/* 칸 배경을 확률만큼 채운다. 숫자만으로는 37% 와 30% 의 차이를 읽는 데
+   시간이 걸리는데, 채워진 길이는 한눈에 비교된다. 칸 폭이 모두 같으므로
+   서로 바로 견줄 수 있다.
+   막대를 따로 그리지 않고 배경을 쓰는 이유: 자리를 차지하지 않아 글자가
+   밀리지 않고, 옅은 톤이라 이름·확률을 읽는 것을 방해하지 않는다.
+   크기(채운 길이) 하나로만 값을 나타내고 색은 전부 같게 둔다 — 색까지
+   달리하면 무엇이 값이고 무엇이 분류인지 흐려진다. */
 .pk {
   display: flex; align-items: center; gap: 5px; min-width: 0;
-  padding: 4px 6px; border-radius: 7px; background: var(--bg);
-  font-size: 12.5px;
+  padding: 5px 6px; border-radius: 7px; font-size: 12.5px;
+  background:
+    linear-gradient(to right,
+      var(--fill) 0 var(--p, 0%), transparent var(--p, 0%) 100%),
+    var(--bg);
 }
 /* 기호를 받은 정(상위 4정)만 앞으로 나온다. 나머지는 배경에 가깝게. */
-.pk-hi { background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+.pk-hi {
+  background:
+    linear-gradient(to right,
+      var(--fill) 0 var(--p, 0%), transparent var(--p, 0%) 100%),
+    var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
 .pk:not(.pk-hi) { opacity: .62; }
 /* 1착한 정 — 결과가 나온 경주에서 한눈에 찾을 수 있게. */
 .pk-win { box-shadow: inset 0 0 0 2px var(--plus); opacity: 1; }

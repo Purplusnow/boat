@@ -59,7 +59,11 @@
        그 사실만 적는다. #}
     {% if not r.picks %}<span class="pk-none">예상 없음</span>{% endif %}
     {% for p in r.picks %}
-    <span class="pk{{ ' pk-hi' if p.mark else '' }}{{ ' pk-win' if p.ord == 1 else '' }}">
+    {# 확률을 칸 아래 막대로도 그린다. 숫자만 보면 37% 와 30% 의 차이를 읽는 데
+       시간이 걸리는데, 길이는 한눈에 비교된다. 칸 폭이 모두 같으므로 막대
+       길이끼리 바로 견줄 수 있다. #}
+    <span class="pk{{ ' pk-hi' if p.mark else '' }}{{ ' pk-win' if p.ord == 1 else '' }}"
+          style="--p: {{ ((p.p_win or 0) * 100) | round(1) }}%">
       <span class="pk-l">{{ lane_no(p.lane, "s") }}<b class="mark">{{ p.mark }}</b></span>
       <span class="pk-nm">{{ p.racer }}</span>
       <small>{{ p.p_win | pct(0) }}</small>
