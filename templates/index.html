@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% from "_macros.html" import race_card, version_badge, lane_no, ad with context %}
 
+{# 검색 결과에 그대로 나가는 자리다. 사이트 이름만 적으면 '경정 예상' 으로
+   찾는 사람과 이어지지 않는다. 무엇을 하는 곳인지 앞에 둔다. #}
+{% block title %}경정 예상 · 미사리 승률 예측과 적중률 검증{% endblock %}
+
 {% block content %}
 
 <section class="hero">

@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% from "_macros.html" import version_badge, lane_no, ad with context %}
 
-{% block title %}{{ race.race_ymd | date_ko }} {{ race.race_no }}R 상세예상 · {{ site.name }}{% endblock %}
-{% block description %}미사리 {{ race.race_ymd | date_ko }} {{ race.race_no }}R — 여섯 척의 승률 예측, 1턴마크 전개 시뮬레이션, 출주표 상세.{% endblock %}
+{# 검색은 날짜보다 **선수 이름**으로 들어온다. 1순위를 제목에 넣는다.
+   블록은 자체 스코프라 바깥의 {% raw %}{% with %}{% endraw %} 값을 받지 못한다 — 블록 안에서 구한다. #}
+{% block title %}{% set t1 = race.runners | sort(attribute='pred_rank') | first %}{{ race.race_ymd | date_ko }} {{ race.race_no }}R{% if t1 %} {{ t1.lane }}번 {{ t1.racer_nm }}{% endif %} · 경정 예상{% endblock %}
+{% block description %}{% set t1 = race.runners | sort(attribute='pred_rank') | first %}미사리 {{ race.race_ymd | date_ko }} {{ race.race_no }}R 경정 예상{% if t1 %} — 1순위 {{ t1.lane }}번 {{ t1.racer_nm }} 승률 {{ t1.p_win | pct }}{% endif %}. 6정 전체 예측 승률과 1턴마크 전개 시뮬레이션, 출주표 상세.{% endblock %}
 
 {% block content %}
 
