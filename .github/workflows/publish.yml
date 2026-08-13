@@ -51,10 +51,14 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # 수집 자료(약 140MB)는 저장소에 담지 않고 캐시로 나른다. 키에 run_id 를
-      # 넣어 매번 새로 저장하고, restore-keys 로 직전 것을 받아 온다.
-      - name: 수집 자료 캐시
-        uses: actions/cache@v4
+      # 수집 자료(약 140MB)는 저장소에 담지 않고 캐시로 나른다.
+      #
+      # **복원과 저장을 나눈 이유**: 통짜 actions/cache 는 잡이 실패하면 저장을
+      # 건너뛴다. 첫 실행에서 24년치를 18분에 걸쳐 받아 놓고 뒤 단계가 깨지는
+      # 바람에 그 수집이 통째로 날아갔다. 수집이 끝나자마자 저장해 두면 이후
+      # 어디서 깨지든 다음 실행이 그 지점부터 이어간다.
+      - name: 수집 자료 복원
+        uses: actions/cache/restore@v4
         with:
           path: data
           key: boatai-db-${{ github.run_id }}
@@ -72,6 +76,14 @@ jobs:
             python -m boatai.predict backfill
           fi
           python -m boatai.kboat.collect prune
+
+      # 비싼 단계가 끝났으니 곧바로 저장한다. 뒤에서 실패해도 남는다.
+      - name: 수집 자료 저장
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: boatai-db-${{ github.run_id }}
 
       # 발주가 지나지 않은 경주에만 예상을 만든다. 이미 저장된 예상은 건드리지
       # 않으므로 하루 두 번 돌려도 덮어쓰지 않는다.

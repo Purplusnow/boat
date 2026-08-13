@@ -10,3 +10,9 @@ pandas==2.3.3
 numpy==2.0.2
 scikit-learn==1.6.1
 joblib==1.5.3
+
+# 사이트 생성. 로컬은 경마 버전 venv 를 공유해 이미 깔려 있었고, 그래서
+# 여기 빠진 것이 첫 자동 배포에서야 드러났다(ModuleNotFoundError: yaml).
+# 실행에 필요한 것은 전부 여기 적는다 — 로컬에 있다는 것은 근거가 아니다.
+Jinja2==3.1.6
+PyYAML==6.0.3
