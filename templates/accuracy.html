@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import bet_table, lane_no, ad with context %}
 
-{% block title %}적중률과 회수율 · {{ site.name }}{{ ad(adsense, 'slot_bottom') }}
-
-{% endblock %}
+{% block title %}적중률과 회수율 · {{ site.name }}{% endblock %}
 {% block description %}저장된 예측을 실제 결과·배당과 대조한 승식별 적중률과 회수율.{% endblock %}
 
 {% block content %}
@@ -132,5 +130,7 @@
       않습니다.</li>
   </ul>
 </section>
+
+{{ ad(adsense, 'slot_bottom') }}
 
 {% endblock %}

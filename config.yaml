@@ -23,9 +23,9 @@ site:
 # 새 사이트는 AdSense 콘솔에 도메인을 추가하고 승인을 받아야 게재가 시작된다.
 adsense:
   client: "ca-pub-4640178123605595"
-  slot_top: ""
-  slot_in_article: ""
-  slot_bottom: ""
+  slot_top: "6510718356"          # boat.koreanblog.xyz_top
+  slot_in_article: "1258391670"   # boat.koreanblog.xyz_article
+  slot_bottom: "1284693865"       # boat.koreanblog.xyz_bottom
 
 build:
   # 상세 페이지를 만들 과거 경주 수. 워크포워드 기록이 1만 6천 경주라 전부

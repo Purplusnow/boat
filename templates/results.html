@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% from "_macros.html" import race_card, ad with context %}
 
-{% block title %}결과 아카이브 · {{ site.name }}{{ ad(adsense, 'slot_bottom') }}
-
-{% endblock %}
+{% block title %}결과 아카이브 · {{ site.name }}{% endblock %}
 {% block description %}예상과 실제 결과를 경주 단위로 대조한 기록. 빗나간 예상도 그대로 남깁니다.{% endblock %}
 
 {% block content %}
@@ -21,5 +19,7 @@
     {% for r in races %}{{ race_card(r, version_label, true, false, vr | length > 1, true) }}{% endfor %}
   </div>
 </section>
+
+{{ ad(adsense, 'slot_bottom') }}
 
 {% endblock %}
