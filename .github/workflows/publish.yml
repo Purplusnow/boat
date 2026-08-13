@@ -67,16 +67,24 @@ jobs:
 
       # 캐시가 없으면(첫 실행·만료) 처음부터 만든다. 24년치 백필이 700회 남짓
       # 호출이라 개발계정 일일 한도(1만) 안에 들어간다. 시간은 걸리지만 드물다.
+      # 포털이 잠시 죽어도 배포까지 죽이지 않는다. 통신 한 번 실패했다고
+      # 사이트를 아예 안 굽는 것보다, 기존 자료로 굽고 경고를 남기는 편이 낫다
+      # — 실제로 ConnectTimeout 한 번에 배포 전체가 멈췄다. 자료 결손은 뒤의
+      # 점검 단계가 세고, 다음 실행이 이어받는다.
+      #
+      # 다만 **DB 가 아예 없을 때의 최초 수집은 관대하게 넘기지 않는다.**
+      # 그때 실패하면 예상도 검증도 없는 빈 사이트가 올라간다.
       - name: 자료 수집
         run: |
           if [ -f data/boatai.sqlite ]; then
-            python -m boatai.kboat.collect daily
+            python -m boatai.kboat.collect daily \
+              || echo "::warning::자료 수집 실패 — 기존 자료로 진행합니다"
           else
             echo "캐시 없음 — 처음부터 수집합니다"
             python -m boatai.kboat.collect backfill
             python -m boatai.predict backfill
           fi
-          python -m boatai.kboat.collect prune
+          python -m boatai.kboat.collect prune || true
 
       # 확정 기록을 DB 로 되돌린다. 캐시가 만료되면 DB 는 새로 만들어지는데,
       # **발주 전에 확정 저장한 예상은 그때 사라지면 안 된다** — 적중률이
@@ -95,7 +103,9 @@ jobs:
       # 발주가 지나지 않은 경주에만 예상을 만든다. 이미 저장된 예상은 건드리지
       # 않으므로 하루 두 번 돌려도 덮어쓰지 않는다.
       - name: 예상 생성
-        run: python -m boatai.predict upcoming
+        run: |
+          python -m boatai.predict upcoming \
+            || echo "::warning::예상 생성 실패 — 기존 예상으로 진행합니다"
 
       # 자료 결손은 실패로 만들지 않는다 — 배당은 원래 늦게 들어오므로 저녁
       # 실행에서도 일부는 비어 있다. 다만 로그에는 남겨 눈에 띄게 한다.
