@@ -153,6 +153,21 @@ DB 는 137MB(raw_json 정리 후)라 저장소에 담지 않고 `actions/cache` 
 한도 안에 들어가지만 시간은 걸린다. 모델(`models/model.joblib`, 4.3MB)은
 저장소에 두어 CI 가 재학습 없이 그대로 쓴다.
 
+## 통계 (Google Analytics)
+
+`config.yaml` 의 `analytics.ga4_id` 로 켠다. 비우면 스크립트 자체가 나가지 않는다.
+
+**만드는 사람의 접속은 세지 않는다.** 개발 중에는 자기 방문이 전체의 대부분을
+차지해, 숫자가 통계가 아니라 자기 그림자가 된다. IP 필터는 주소가 바뀌면 새므로
+브라우저에 표식을 남긴다 — 기기마다 한 번씩 아래로 들어오면 그 뒤로는 계속 빠진다.
+
+```
+https://boat.koreanblog.xyz/?noga=1   # 이 브라우저를 집계에서 뺀다
+https://boat.koreanblog.xyz/?noga=0   # 되돌린다
+```
+
+표식이 있으면 gtag 스크립트를 아예 싣지 않으므로 네트워크 요청도 나가지 않는다.
+
 ## 광고 (AdSense)
 
 `config.yaml` 의 `adsense` 절로 켠다. **client 가 비어 있으면 로더 스크립트도

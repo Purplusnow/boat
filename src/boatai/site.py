@@ -457,6 +457,7 @@ def build(db: str, out: Path, cfg: Dict) -> None:
         "assets": asset_versions(),
         "base": base,
         "adsense": cfg.get("adsense", {}) or {},
+        "analytics": cfg.get("analytics", {}) or {},
     }
 
     with session(db) as conn:
