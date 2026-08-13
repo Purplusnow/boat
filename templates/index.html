@@ -79,12 +79,12 @@
   </h2>
   <div class="ri-list">
     {% set vs = upcoming | map(attribute='version') | unique | list %}
-    {% for r in upcoming %}{{ race_card(r, version_label, false, true, vs | length > 1) }}{% endfor %}
+    {% for r in upcoming %}{{ race_card(r, version_label, true, true, vs | length > 1) }}{% endfor %}
   </div>
 </section>
 {% else %}
 <section class="card empty">
-  <h2>다가올 경주 없음</h2>
+  <h2>예정된 경주 없음</h2>
   <p>다음 개최일(수·목) 출주표가 공개되면 이곳에 게시됩니다.</p>
 </section>
 {% endif %}

@@ -51,6 +51,21 @@ VERSION_LABEL = {
 
 WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"]
 
+# 그날 편성 전체. 예상이 없는 경주도 포함한다 — 자동 실행이 늦어 발주가 지난
+# 경주에는 예상을 만들지 않는데(동결 규칙), 그렇다고 목록에서 빼면 1R 이 사라지고
+# 8R 부터 시작하는 이상한 시간표가 된다. 편성은 그대로 두고 예상 자리만 비운다.
+DAY_SQL = """
+SELECT r.race_key, r.race_ymd, r.stnd_yr, r.week_tcnt, r.day_tcnt, r.race_no,
+       r.post_time, r.race_class, r.st_method, r.field_size,
+       COALESCE(r.has_result, 0) AS has_result,
+       (SELECT COUNT(*) FROM predictions p WHERE p.race_key = r.race_key
+                                       AND p.model_version = ?)  AS n_pred
+FROM races r
+WHERE r.race_ymd = ?
+  AND EXISTS (SELECT 1 FROM entries e WHERE e.race_key = r.race_key)
+ORDER BY r.race_no ASC
+"""
+
 RACE_SQL = """
 SELECT r.race_key, r.race_ymd, r.stnd_yr, r.week_tcnt, r.day_tcnt, r.race_no,
        r.post_time, r.race_class, r.st_method, r.field_size,
@@ -444,13 +459,33 @@ def build(db: str, out: Path, cfg: Dict) -> None:
         today = today_kst().strftime("%Y%m%d")
         # 다가올 경주는 **가까운 날 · 이른 경주** 순이다. 곧 발주할 것이 위에 와야
         # 쓸모가 있다. (결과 목록은 최신 날짜가 위, 그 안에서는 1R 부터.)
-        upcoming = sorted([r for r in live if not r["has_result"]],
-                          key=lambda r: (r["race_ymd"] or "", r["race_no"] or 0)
-                          )[: bcfg.get("upcoming_limit", 60)]
-        # 결과가 나온 실전 경주가 먼저, 모자라면 모의 기록으로 채운다. 둘은
-        # 화면에서 배지로 구분되므로 섞여도 오해가 없다.
-        finished = [r for r in live if r["has_result"]]
-        finished += [r for r in oos if r["has_result"]]
+        # ── 첫 화면에 실을 '그날 전 경주' ────────────────────────
+        #
+        # **끝난 경주를 목록에서 빼지 않는다.** 결과가 들어왔다고 그 경주만
+        # 빠지면 그날 시간표가 앞뒤로 갈려, 1R 은 사라지고 5R 부터 보이는
+        # 이상한 목록이 된다. 무엇을 밀었는지도 함께 사라진다.
+        # 하루를 통째로 두고, 지난 경주는 화면에서 가라앉히기만 한다.
+        live_sorted = sorted(live, key=lambda r: (r["race_ymd"] or "",
+                                                  r["race_no"] or 0))
+        pending = [r["race_ymd"] for r in live_sorted
+                   if not r["has_result"] and r["race_ymd"]]
+        if pending:
+            target_day = min(pending)          # 아직 남은 경주가 있는 개최일
+        else:
+            days_all = [r["race_ymd"] for r in live_sorted if r["race_ymd"]]
+            target_day = max(days_all) if days_all else None
+        # 예상이 있는 경주만 뽑으면 편성에 구멍이 난다. 그날 전체를 다시 읽는다.
+        upcoming = []
+        if target_day:
+            for row in conn.execute(DAY_SQL, (LIVE_VERSION, target_day)):
+                r = _dict(row)
+                r["date_label"] = fmt_date(r["race_ymd"])
+                r["version"] = LIVE_VERSION
+                upcoming.append(r)
+
+        # 결과 아카이브는 그날을 빼고 쌓는다 — 같은 경주가 두 번 나오지 않게.
+        finished = [r for r in live if r["has_result"] and r["race_ymd"] != target_day]
+        finished += [r for r in oos if r["has_result"] and r["race_ymd"] != target_day]
         finished = finished[: bcfg.get("results_limit", 300)]
 
         # ── 경주 상세 ────────────────────────────────────────────

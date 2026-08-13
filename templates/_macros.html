@@ -53,6 +53,10 @@
   </div>
   {# 폭이 모자라면 여기서 다음 줄로 흐른다. #}
   <div class="ri-picks">
+    {# 예상이 없는 경주 — 자동 실행이 발주 뒤에 돌면 그날 앞 경주는 예상을
+       만들지 않는다(발주 후에 만든 예상은 예상이 아니므로). 편성은 남기고
+       그 사실만 적는다. #}
+    {% if not r.picks %}<span class="pk-none">예상 없음</span>{% endif %}
     {% for p in r.picks %}
     <span class="pk">
       <b class="mark">{{ p.mark }}</b>{{ lane_no(p.lane, "s") }}<span class="pk-nm">{{ p.racer }}</span>
