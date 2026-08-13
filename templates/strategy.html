@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% from "_macros.html" import ad with context %}
 
-{% block title %}실전 베팅 전략 검토 · {{ site.name }}{% endblock %}
+{% block title %}실전 베팅 전략 검토 · {{ site.name }}{{ ad(adsense, 'slot_bottom') }}
+
+{% endblock %}
 {% block description %}마틴게일 등 베팅금 조절과 선택 규칙을 실제 15,958경주에 적용해 수익률을 다시 계산했습니다.{% endblock %}
 
 {% block content %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import race_card, version_badge, lane_no with context %}
+{% from "_macros.html" import race_card, version_badge, lane_no, ad with context %}
 
 {% block content %}
 
@@ -89,6 +89,8 @@
 </section>
 {% endif %}
 
+{{ ad(adsense, 'slot_top') }}
+
 {% if day_list %}
 <section class="card">
   <h2>경주일</h2>
@@ -124,5 +126,7 @@
     1착 68.7% · 2착 이내 86.3%(전체 경주의 15%)입니다.
   </p>
 </section>
+
+{{ ad(adsense, 'slot_bottom') }}
 
 {% endblock %}

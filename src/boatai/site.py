@@ -435,6 +435,12 @@ def build(db: str, out: Path, cfg: Dict) -> None:
     host = urlparse(cfg.get("site", {}).get("url") or "").hostname
     if host:
         (out / "CNAME").write_text(host + "\n", encoding="utf-8")
+    # ads.txt 가 없으면 애드센스가 '승인되지 않은 판매자'로 보고 게재를 막는다.
+    # 도메인 루트에 있어야 하므로 빌드 산출물에 함께 굽는다.
+    client = (cfg.get("adsense", {}) or {}).get("client") or ""
+    if client.startswith("ca-"):
+        (out / "ads.txt").write_text(
+            f"google.com, {client[3:]}, DIRECT, f08c47fec0942fa0\n", encoding="utf-8")
 
     bcfg = cfg.get("build", {})
     # 배포 기준 경로. 환경변수가 설정을 이긴다 — 같은 소스로 로컬(루트)과
@@ -450,6 +456,7 @@ def build(db: str, out: Path, cfg: Dict) -> None:
         "bet_order": BET_ORDER,
         "assets": asset_versions(),
         "base": base,
+        "adsense": cfg.get("adsense", {}) or {},
     }
 
     with session(db) as conn:

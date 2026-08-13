@@ -577,3 +577,15 @@ a.ri.is-past:hover { background: var(--panel); border-color: var(--accent); }
 
 @media (max-width: 1000px) { .ri-picks { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 560px)  { .ri-picks { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── 광고 자리 ─────────────────────────────────────────────
+ * 예상 내용과 섞여 보이면 안 된다. 라벨을 달고 카드와 다른 낯으로 둔다. */
+.ad-slot {
+  display: block; margin: 18px 0; padding: 10px;
+  border: 1px dashed var(--line); border-radius: var(--radius);
+  background: var(--bg); min-height: 90px;
+}
+.ad-label {
+  display: block; font-size: 10.5px; color: var(--dim); margin-bottom: 6px;
+  letter-spacing: .04em;
+}

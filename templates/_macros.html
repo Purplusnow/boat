@@ -6,6 +6,24 @@
    (2 흑 · 4 청 · 6 녹)에서는 숫자가 묻혀 읽히지 않았다. 표에서 필요한 것은
    장식이 아니라 '몇 번인지 한눈에 보이는 것'이다.
    색만으로 구분하면 색각 이상에서 3(적)과 6(녹)이 섞이므로 숫자가 곧 본문이다. #}
+{# 광고 자리. client 나 slot 이 비어 있으면 아무것도 렌더링하지 않는다 —
+   설정이 없는 채로 빈 상자가 남으면 화면만 성기게 된다.
+   광고임을 밝히는 라벨을 붙인다. 예상 내용과 광고가 섞여 보이면 안 된다. #}
+{% macro ad(adsense, slot_key, label='광고') %}
+{% set slot = adsense.get(slot_key) %}
+{% if adsense.get('client') and slot %}
+<aside class="ad-slot" aria-label="광고">
+  <span class="ad-label">{{ label }}</span>
+  <ins class="adsbygoogle" style="display:block"
+       data-ad-client="{{ adsense.client }}"
+       data-ad-slot="{{ slot }}"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</aside>
+{% endif %}
+{% endmacro %}
+
 {% macro lane_no(lane, size='m') %}<span class="lane-no ln-{{ size }} lane-{{ lane }}" title="{{ lane }}번정">{{ lane }}</span>{% endmacro %}
 
 {% macro version_badge(version, version_label) %}

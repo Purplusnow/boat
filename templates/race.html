@@ -1,7 +1,9 @@
 {% extends "base.html" %}
-{% from "_macros.html" import version_badge, lane_no with context %}
+{% from "_macros.html" import version_badge, lane_no, ad with context %}
 
-{% block title %}{{ race.race_ymd | date_ko }} {{ race.race_no }}R 상세예상 · {{ site.name }}{% endblock %}
+{% block title %}{{ race.race_ymd | date_ko }} {{ race.race_no }}R 상세예상 · {{ site.name }}{{ ad(adsense, 'slot_bottom') }}
+
+{% endblock %}
 {% block description %}미사리 {{ race.race_ymd | date_ko }} {{ race.race_no }}R — 여섯 척의 승률 예측, 1턴마크 전개 시뮬레이션, 출주표 상세.{% endblock %}
 
 {% block content %}
@@ -66,6 +68,8 @@
     {% for m, meaning in mark_meaning.items() %}<span><b class="mark">{{ m }}</b> {{ meaning }}</span>{% endfor %}
   </div>
 </section>
+
+{{ ad(adsense, 'slot_in_article') }}
 
 {# ── 전개 시뮬레이션 ───────────────────────────────────────── #}
 {% if race.sim and race.sim.script %}
