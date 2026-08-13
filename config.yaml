@@ -18,7 +18,7 @@ site:
 # 비어 있으면 태그 자체가 나가지 않는다.
 verification:
   google: ""   # 서치콘솔 → HTML 태그 방식
-  naver: ""    # 서치어드바이저 → HTML 태그 방식
+  naver: "d730ccbc3bd3936128cb2bc09bd6e7fb4053e489"   # 서치어드바이저
 
 # 구글 애널리틱스. 비우면 스크립트 자체가 나가지 않는다.
 analytics:
