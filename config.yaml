@@ -5,14 +5,11 @@
 site:
   name: "경정 분석"
   tagline: "미사리 경정 · 승률 예측과 적중률 검증"
-  # 절대 URL. 채우면 canonical 이 붙는다. (예: https://user.github.io)
-  url: ""
-  # **배포 기준 경로.** GitHub Pages 프로젝트 페이지는 user.github.io/<저장소>/
-  # 아래에 놓이므로, 모든 내부 링크가 이 경로로 시작해야 한다. 비워 두면
-  # 루트 배포(커스텀 도메인·사용자 페이지)로 동작한다.
-  #
-  # 로컬에서 `python -m http.server -d dist` 로 열 때는 루트이므로 비워 두고,
-  # 배포 빌드에서만 채운다:  BOATAI_BASE=/boatai python -m boatai.site
+  # 절대 URL. canonical 과 dist/CNAME 이 여기서 나온다.
+  url: "https://boat.koreanblog.xyz"
+  # **배포 기준 경로.** 커스텀 도메인은 루트에 놓이므로 비워 둔다.
+  # 프로젝트 페이지(user.github.io/<저장소>/)로 옮길 일이 생기면 그때만
+  # BOATAI_BASE=/<저장소명> 으로 빌드하면 된다 — 링크가 전부 그 경로로 나간다.
   base_path: ""
   locale: "ko_KR"
   description: "미사리 경정 출주표와 선수·모터·코스 기록을 분석해 경주별 승률을 산출합니다. 예상은 발주 전에 확정 저장하며, 실제 결과·배당과 대조한 적중률과 회수율을 공개합니다."

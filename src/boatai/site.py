@@ -24,6 +24,7 @@ import shutil
 import sqlite3
 from pathlib import Path
 from typing import Dict, List, Optional
+from urllib.parse import urlparse
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -413,6 +414,11 @@ def build(db: str, out: Path, cfg: Dict) -> None:
     # 시작하는 이름이 조용히 무시된다 — 지금은 해당 없지만 나중에 하나만
     # 생겨도 원인을 찾기 어려운 실종이 된다.
     (out / ".nojekyll").write_text("", encoding="utf-8")
+    # 커스텀 도메인은 **배포 산출물 안에** CNAME 이 있어야 유지된다. Actions 로
+    # 배포하면 저장소 설정만으로는 매 배포마다 도메인이 풀릴 수 있다.
+    host = urlparse(cfg.get("site", {}).get("url") or "").hostname
+    if host:
+        (out / "CNAME").write_text(host + "\n", encoding="utf-8")
 
     bcfg = cfg.get("build", {})
     # 배포 기준 경로. 환경변수가 설정을 이긴다 — 같은 소스로 로컬(루트)과

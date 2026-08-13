@@ -34,9 +34,9 @@ concurrency:
 env:
   PYTHONPATH: src
   KBOAT_SERVICE_KEY: ${{ secrets.KBOAT_SERVICE_KEY }}
-  # 프로젝트 페이지는 user.github.io/<저장소>/ 아래에 놓인다. 모든 내부 링크가
-  # 이 경로로 시작해야 한다 — 비워 두면 전부 404 가 된다.
-  BOATAI_BASE: /${{ github.event.repository.name }}
+  # 커스텀 도메인(boat.koreanblog.xyz)은 루트에 놓이므로 기준 경로가 없다.
+  # 프로젝트 페이지로 옮기면 여기를 /<저장소명> 으로 채운다.
+  BOATAI_BASE: ""
 
 jobs:
   build:
