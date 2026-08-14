@@ -181,12 +181,18 @@ def _as_list(items: Any) -> List[dict]:
 @dataclass
 class KboatClient:
     service_key: str
-    # 연결과 응답을 따로 잡는다. 게이트웨이가 응답하지 않을 때 연결 단계에서
-    # 20초씩 붙들리면 재시도까지 겹쳐 배치가 통째로 타임아웃된다. 연결은 못 하면
-    # 빨리 포기하고, 연결된 뒤 오래 걸리는 응답만 넉넉히 기다린다.
-    connect_timeout: float = 6.0
-    timeout: float = 20.0
-    max_retries: int = 4
+    # 연결과 응답을 따로 잡는다.
+    #
+    # 연결 제한을 6초로 두었더니 **국내에서는 멀쩡한데 해외 러너에서만** 계속
+    # 끊겼다(GitHub Actions 에서 ConnectTimeout 으로 배포가 두 번 실패). 국가기관
+    # API 라 해외에서의 왕복이 느리고, 첫 연결이 특히 오래 걸린다. 넉넉히 준다 —
+    # 어차피 응답이 오면 바로 진행하므로 제한을 늘려도 정상 경로는 느려지지 않는다.
+    #
+    # 환경변수로 덮어쓸 수 있게 둔다. 자동 배포는 더 여유롭게, 손으로 돌릴 때는
+    # 빨리 포기하고 싶을 수 있다.
+    connect_timeout: float = float(os.environ.get("BOATAI_CONNECT_TIMEOUT", 15))
+    timeout: float = float(os.environ.get("BOATAI_READ_TIMEOUT", 45))
+    max_retries: int = int(os.environ.get("BOATAI_RETRIES", 5))
     pause: float = 0.15  # 연속 호출 간격 (코드 23 = 초당 호출량 초과 방지)
     session: requests.Session = field(default_factory=requests.Session)
     _last_call: float = field(default=0.0, repr=False)
