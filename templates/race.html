@@ -36,7 +36,9 @@
   <h2>결과</h2>
   <p>
     1순위로 꼽은 <b>{{ lane_no(race.outcome.top1_lane, "xs") }}{{ race.outcome.top1_racer }}</b> 가
-    {% if race.outcome.top1_ord %}<b>{{ race.outcome.top1_ord }}착</b>{% else %}착순 미확인{% endif %}.
+    {% if race.outcome.top1_ord and race.outcome.top1_ord > 0 %}<b>{{ race.outcome.top1_ord }}착</b>
+    {%- elif race.outcome.top1_ord == 0 %}<b>미완주</b>
+    {%- else %}착순 미확인{% endif %}.
     {% if race.outcome.hit_win %}단승 적중.
     {% elif race.outcome.hit_place %}단승은 빗나갔지만 2착 이내(연승 적중).
     {% else %}빗나갔습니다.{% endif %}
@@ -236,7 +238,12 @@
         <td class="r">{{ r.avg_acdnt_scr | num(2) }}
           {% if r.f_cnt %}<small class="bad">F{{ r.f_cnt }}</small>{% endif %}</td>
         {% if race.outcome %}
-        <td class="r">{% if r.ord %}<span class="ord ord-{{ r.ord }}">{{ r.ord }}</span>{% else %}—{% endif %}</td>
+        {# 착순 0 은 미완주(실격·전복·낙수 등)다. 전체 경주의 13% 에 나온다.
+           '—' 로만 두면 '자료가 없다' 와 구분되지 않는다. #}
+        <td class="r">
+          {%- if r.ord and r.ord > 0 %}<span class="ord ord-{{ r.ord }}">{{ r.ord }}</span>
+          {%- elif r.ord == 0 %}<span class="dnf">미완주</span>
+          {%- else %}—{% endif %}</td>
         {% endif %}
       </tr>
       {% endfor %}

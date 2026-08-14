@@ -60,7 +60,8 @@
     {% if show_result %}
     <span class="ri-hit">
       {% if r.has_result and r.outcome %}
-        {% if r.outcome.top1_ord %}<span class="ord ord-{{ r.outcome.top1_ord }}">{{ r.outcome.top1_ord }}착</span>{% endif %}
+        {% if r.outcome.top1_ord and r.outcome.top1_ord > 0 %}<span class="ord ord-{{ r.outcome.top1_ord }}">{{ r.outcome.top1_ord }}착</span>
+        {%- elif r.outcome.top1_ord == 0 %}<span class="dnf">미완주</span>{% endif %}
         {% if r.outcome.hit_win %}<span class="hit">단승</span>{% endif %}
         {% if r.outcome.hit_quinella %}<span class="hit">복승</span>{% endif %}
         {% if r.outcome.hit_trio %}<span class="hit">삼복승</span>{% endif %}
