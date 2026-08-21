@@ -29,13 +29,21 @@ import pandas as pd
 from .clock import now_kst
 from .features import build_frame, feature_columns
 from .kboat.store import session, upsert
-from .model import MODEL_VERSION, fit, load, predict_frame
+from .model import MODEL_DIR, MODEL_VERSION, fit, load, predict_frame
 
 log = logging.getLogger(__name__)
 
 # 사후에 만든 모의 예측임을 이름에 박아 둔다. 표에서 실전 기록과 나란히 놓였을
 # 때 무엇인지 바로 보이지 않으면 언젠가 섞인다.
 OOS_VERSION = f"{MODEL_VERSION}-oos"
+
+# 발주가 지난 뒤에 만든 예상. **v1 과 절대 섞지 않는다.**
+#
+# 사이트를 만들기 전에 시행된 경주나, 자동 실행이 늦어 발주 전에 예상을 만들지
+# 못한 경주가 목록에서 통째로 비는 것을 메우기 위한 것이다. 피처는 전부 경주 전
+# 공개값이라 결과를 보고 만든 것은 아니지만(누수 없음), **발주 전에 공개된
+# 기록은 아니므로** 적중률의 근거가 될 수 없다. 화면에서 '사후' 로 구분한다.
+LATE_VERSION = f"{MODEL_VERSION}-late"
 
 
 def _post_datetime(row) -> Optional[dt.datetime]:
@@ -128,7 +136,8 @@ def _has_simulation(conn: sqlite3.Connection, race_key: str) -> bool:
                         (race_key,)).fetchone() is not None
 
 
-def _attach_stored_probs(conn: sqlite3.Connection, df: pd.DataFrame) -> pd.DataFrame:
+def _attach_stored_probs(conn: sqlite3.Connection, df: pd.DataFrame,
+                         version: str = MODEL_VERSION) -> pd.DataFrame:
     """**저장된** 예측 확률을 붙인다.
 
     시뮬레이션은 예측 확률에 닻을 내린다. 모델을 다시 돌려 확률을 새로 만들면
@@ -137,7 +146,7 @@ def _attach_stored_probs(conn: sqlite3.Connection, df: pd.DataFrame) -> pd.DataF
     """
     stored = pd.read_sql_query(
         "SELECT race_key, lane, p_win AS p_win_norm FROM predictions "
-        "WHERE model_version = ?", conn, params=[MODEL_VERSION])
+        "WHERE model_version = ?", conn, params=[version])
     return df.drop(columns=["p_win_norm"], errors="ignore").merge(
         stored, on=["race_key", "lane"], how="inner")
 
@@ -172,6 +181,66 @@ def _freeze_simulations(conn: sqlite3.Connection, pred: pd.DataFrame) -> int:
         done += 1
     conn.commit()
     return done
+
+
+def _training_cutoff() -> str:
+    """모델이 학습에 쓴 마지막 경주일 (``"20260806"`` 형식).
+
+    이 날 이후가 '실전 구간'이다. 그 앞은 학습에 쓴 자료라 사후 예상을 붙일
+    이유가 없다. 지표 파일이 없으면 아무것도 안 만드는 쪽으로 기운다.
+    """
+    try:
+        raw = json.loads((MODEL_DIR / "metrics.json").read_text(encoding="utf-8"))
+        return str(raw.get("date_max", "")).replace("-", "") or "99999999"
+    except (OSError, ValueError):
+        return "99999999"
+
+
+def predict_late(conn: sqlite3.Connection) -> int:
+    """예상이 없는 지난 경주에 **사후에** 예상을 만든다.
+
+    쓰는 곳은 하나다 — 기록의 구멍 메우기. 사이트가 없던 날의 경주나 자동
+    실행이 늦은 날의 앞 경주는 예상이 아예 없어 목록에서 비어 보인다.
+
+    **결과를 보지 않는다.** 피처는 출주표(경주 전 공개값)에서만 나오므로 누수는
+    없다. 그래도 발주 전에 확정한 기록은 아니므로 v1 에 넣지 않는다 — 여기서
+    한 번 섞으면 적중률 전체가 '사후에 만든 숫자'가 되어 아무것도 증명하지
+    못한다.
+    """
+    bundle = load()
+    models, cols = bundle["models"], bundle["features"]
+
+    df = build_frame(conn, with_labels=False)
+    if df.empty:
+        return 0
+    # **학습 종료일 이후 경주만 손댄다.**
+    #
+    # 처음엔 '예상이 없는 경주' 전부를 대상으로 삼았다가 16,081경주를 만들어
+    # 버렸다. v1-oos 는 워크포워드 검증 구간(전체의 뒤 절반)만 덮으므로,
+    # 그 앞 2002~2015 년이 통째로 '예상 없음' 이었던 것이다. 그 시절 경주에
+    # 지금 모델로 예상을 붙이는 것은 아무 뜻이 없다 — 학습에 쓴 자료다.
+    #
+    # 메울 가치가 있는 구멍은 **학습이 끝난 뒤에 시행됐는데 예상을 못 만든
+    # 경주**뿐이다. 그 경계가 모델의 date_max 다.
+    cutoff = _training_cutoff()
+    have = (frozen_keys(conn, MODEL_VERSION)
+            | frozen_keys(conn, LATE_VERSION)
+            | frozen_keys(conn, OOS_VERSION))
+    todo = {r["race_key"] for r in df.to_dict("records")
+            if r["race_key"] not in have
+            and str(r.get("race_ymd") or "") > cutoff}
+    if not todo:
+        log.info("사후 예상을 만들 경주가 없습니다.")
+        return 0
+
+    target = df[df["race_key"].isin(todo)].copy()
+    pred = predict_frame(models, target, cols)
+    n = _write(conn, pred, LATE_VERSION)
+    log.info("사후 예상 %d행 / %d경주", n, len(todo))
+    # 전개도 함께 만든다. 없으면 상세 페이지에 시뮬레이션 칸이 통째로 빈다.
+    n_sim = _freeze_simulations(conn, _attach_stored_probs(conn, pred, LATE_VERSION))
+    log.info("전개 시뮬레이션 %d경주", n_sim)
+    return n
 
 
 def predict_backfill(conn: sqlite3.Connection, n_folds: int = 5,
@@ -275,7 +344,7 @@ def import_frozen(conn: sqlite3.Connection, path: Path = FROZEN_PATH) -> int:
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="경정 예측 생성")
     ap.add_argument("command",
-                    choices=["upcoming", "backfill", "export", "import"])
+                    choices=["upcoming", "backfill", "late", "export", "import"])
     ap.add_argument("--db", default="data/boatai.sqlite")
     ap.add_argument("--folds", type=int, default=5)
     args = ap.parse_args(argv)
@@ -288,6 +357,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             except FileNotFoundError as e:
                 print(f"✗ {e}", file=sys.stderr)
                 return 1
+        elif args.command == "late":
+            predict_late(conn)
         elif args.command == "backfill":
             predict_backfill(conn, n_folds=args.folds)
         elif args.command == "export":

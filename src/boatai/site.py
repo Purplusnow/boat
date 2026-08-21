@@ -44,9 +44,14 @@ STATIC_DIR = Path("static")
 # 발주 전에 확정 저장한 공개 기록 / 시간순 교차검증으로 산출한 검증 기록.
 LIVE_VERSION = "v1"
 OOS_VERSION = "v1-oos"
+# 발주가 지난 뒤에 만든 예상. 기록의 구멍을 메우려고 둔 것이고, 결과를 보지
+# 않고 산출했지만 **발주 전에 확정한 기록이 아니므로 적중률에 넣지 않는다.**
+LATE_VERSION = "v1-late"
 VERSION_LABEL = {
     LIVE_VERSION: ("공개", "발주 전에 확정 저장한 예상"),
     OOS_VERSION: ("검증", "시간순 교차검증으로 산출한 과거 재현 기록"),
+    LATE_VERSION: ("사후", "경주가 끝난 뒤 산출한 예상 — 결과를 보지 않았지만 "
+                          "발주 전에 공개된 기록은 아니다"),
 }
 
 WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"]
@@ -471,6 +476,7 @@ def build(db: str, out: Path, cfg: Dict) -> None:
         metrics = load_metrics()
         live = load_races(conn, LIVE_VERSION)
         oos = load_races(conn, OOS_VERSION)
+        late = load_races(conn, LATE_VERSION)
 
         today = today_kst().strftime("%Y%m%d")
         # 다가올 경주는 **가까운 날 · 이른 경주** 순이다. 곧 발주할 것이 위에 와야
@@ -501,7 +507,13 @@ def build(db: str, out: Path, cfg: Dict) -> None:
 
         # 결과 아카이브는 그날을 빼고 쌓는다 — 같은 경주가 두 번 나오지 않게.
         finished = [r for r in live if r["has_result"] and r["race_ymd"] != target_day]
+        # 사후 예상은 공개 기록 다음에 둔다. 배지로 구분되므로 섞여도 오해가 없고,
+        # 목록에서 그날만 통째로 비는 것보다 낫다.
+        finished += [r for r in late if r["has_result"] and r["race_ymd"] != target_day]
         finished += [r for r in oos if r["has_result"] and r["race_ymd"] != target_day]
+        # 날짜 최신순, 하루 안에서는 1R 부터.
+        finished.sort(key=lambda r: (r["race_ymd"] or "", -(r["race_no"] or 0)),
+                      reverse=True)
         finished = finished[: bcfg.get("results_limit", 300)]
 
         # ── 경주 상세 ────────────────────────────────────────────
@@ -552,15 +564,25 @@ def build(db: str, out: Path, cfg: Dict) -> None:
                        page_url=f"/day/{ymd}/", **ctx_base))
 
         # ── 검증 ─────────────────────────────────────────────────
-        reports = {v: build_report(conn, v) for v in (LIVE_VERSION, OOS_VERSION)}
+        reports = {v: build_report(conn, v)
+                   for v in (LIVE_VERSION, LATE_VERSION, OOS_VERSION)}
 
-        # 고배당 카드에서 상세 페이지로 갈 수 있는 것만 링크한다. 오래된
-        # 경주는 상세를 굽지 않으므로(build.past_races) 링크가 깨진다.
+        # ── 고배당 카드 ─────────────────────────────────────────
+        #
+        # **공개 기록을 먼저 쓴다.** 실전에서 터진 것이 있으면 그것이 이 사이트의
+        # 성과이고, 검증 기록은 그 자리를 메우는 보조다. 다만 지금은 실전 51경주에
+        # 10배 이상 적중이 하나도 없어 대부분 검증분으로 채워진다 — 그래서 카드마다
+        # 어느 기록인지 배지를 단다. 섹션 하나로 뭉뚱그리면 나중에 실전 적중이
+        # 섞여 들어올 때 구분이 사라진다.
         have_page = {p["race_key"] for p in race_pages}
-        for rep in reports.values():
-            for group in (rep.get("highlights") or {}).values():
-                for h in group:
-                    h["has_page"] = h["race_key"] in have_page
+        merged: List[Dict] = []
+        for ver in (LIVE_VERSION, LATE_VERSION, OOS_VERSION):
+            for h in ((reports.get(ver) or {}).get("highlights") or {}).get("recent", []):
+                h["has_page"] = h["race_key"] in have_page
+                h["version"] = ver
+                merged.append(h)
+        merged.sort(key=lambda h: (h["date"], h["odds"]), reverse=True)
+        highlights = {"recent": merged[:6], "top": []}
 
         # ── 베팅 전략 ────────────────────────────────────────────
         strat = strategy_report(conn, OOS_VERSION)
@@ -574,7 +596,7 @@ def build(db: str, out: Path, cfg: Dict) -> None:
     _write(out / "index.html", env.get_template("index.html").render(
         upcoming=upcoming, finished=finished[:20], metrics=metrics,
         today=today, day_list=sorted(days, reverse=True)[:12],
-        highlights=(reports.get(OOS_VERSION) or {}).get("highlights"),
+        highlights=highlights,
         reports=reports, page_url="/", **ctx_base))
 
     _write(out / "results" / "index.html", env.get_template("results.html").render(

@@ -49,13 +49,14 @@
 
 {% if highlights and highlights.recent %}
 <section class="card">
-  <h2>고배당 적중 <span class="count">검증 기록</span></h2>
+  <h2>고배당 적중</h2>
   <div class="hl-grid">
     {% for h in highlights.recent %}
     {% if h.has_page %}<a class="hl" href="{{ base }}/race/{{ h.race_key }}/">{% else %}<div class="hl">{% endif %}
       <b class="hl-odds">{{ h.odds }}<i>배</i></b>
       <span class="hl-bet">{{ h.bet }}</span>
-      <span class="hl-meta">{{ h.date }} · {{ h.race_no }}R</span>
+      <span class="hl-meta">{{ h.date }} · {{ h.race_no }}R
+        {{ version_badge(h.version, version_label) }}</span>
       <span class="hl-pick">{{ lane_no(h.lane, "xs") }}{{ h.racer }}</span>
     {% if h.has_page %}</a>{% else %}</div>{% endif %}
     {% endfor %}
@@ -63,8 +64,9 @@
   {# '역대 최고'는 싣지 않는다. 10년 전 기록은 지금 이 모델의 성능과 무관하고,
      오래된 것을 앞세우면 최근에 못 맞히고 있다는 인상만 남는다. #}
   <p class="note">
-    실제 확정배당으로 계산한 <b>시간순 교차검증 기록</b>입니다. 각 경주 이전
-    자료만으로 학습한 모델의 예상이며, 발주 전에 공개된 기록은 아닙니다.
+    실제 확정배당으로 계산한 값입니다. 카드의 배지가 어느 기록인지 알려줍니다 —
+    <b>공개</b>는 발주 전에 확정 저장한 예상, <b>검증</b>·<b>사후</b>는 경주가
+    끝난 뒤 산출한 기록입니다(결과를 보고 만든 것은 아닙니다).
     <a href="{{ base }}/accuracy/">전체 적중률과 회수율 →</a>
   </p>
 </section>
