@@ -325,18 +325,43 @@ def import_frozen(conn: sqlite3.Connection, path: Path = FROZEN_PATH) -> int:
         log.warning("확정 기록 파일을 읽지 못했습니다: %s", path)
         return 0
     n = 0
+    drift = 0
+    # 확률값이 어긋나면 조용히 넘기지 않는다. 같은 출주표에 같은 모델이면 같은
+    # 값이 나와야 하고, 다르다면 기록이 손상됐거나 모델이 바뀐 것이다 — 어느
+    # 쪽이든 알아야 한다. (값 자체는 그대로 둔다. 되돌리기는 덮어쓰기가 아니다.)
+    VALUE_COLS = ("p_win", "p_top2", "p_top3", "pred_rank")
     for r in blob.get("predictions", []):
+        cur = conn.execute(
+            "SELECT p_win, p_top2, p_top3, pred_rank FROM predictions "
+            "WHERE race_key=? AND lane=? AND model_version=?",
+            (r["race_key"], r["lane"], r["model_version"])).fetchone()
+        if cur is not None:
+            for i, c in enumerate(VALUE_COLS):
+                a, b = cur[i], r.get(c)
+                if a is not None and b is not None and abs(float(a) - float(b)) > 1e-9:
+                    drift += 1
+                    log.warning("확정 기록 불일치 %s 정번%s %s: DB %s ≠ 파일 %s",
+                                r["race_key"], r["lane"], c, a, b)
+                    break
         cols = ",".join(r)
+        # **확정 시각은 둘 중 이른 쪽으로.** 발주 전에 만들어졌다는 근거가 이
+        # 값이므로 나중 실행이 밀어 올리면 근거가 약해진다. 로컬에서 다시 돌릴
+        # 때마다 시각만 바뀌어 기록 파일이 충돌하던 문제도 여기서 사라진다.
         conn.execute(
             f"INSERT INTO predictions({cols}) VALUES({','.join('?' * len(r))}) "
-            "ON CONFLICT(race_key, lane, model_version) DO NOTHING",
+            "ON CONFLICT(race_key, lane, model_version) DO UPDATE SET "
+            "created_at = MIN(predictions.created_at, excluded.created_at)",
             tuple(r.values()))
         n += 1
+    if drift:
+        log.warning("확정 기록과 DB 가 어긋난 행 %d개 — 값은 DB 쪽을 유지했다", drift)
     for r in blob.get("simulations", []):
         cols = ",".join(r)
         conn.execute(
             f"INSERT INTO simulations({cols}) VALUES({','.join('?' * len(r))}) "
-            "ON CONFLICT(race_key) DO NOTHING", tuple(r.values()))
+            "ON CONFLICT(race_key) DO UPDATE SET "
+            "created_at = MIN(simulations.created_at, excluded.created_at)",
+            tuple(r.values()))
     conn.commit()
     return n
 
