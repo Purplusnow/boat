@@ -497,20 +497,30 @@ def build(db: str, out: Path, cfg: Dict) -> None:
             days_all = [r["race_ymd"] for r in live_sorted if r["race_ymd"]]
             target_day = max(days_all) if days_all else None
         # 예상이 있는 경주만 뽑으면 편성에 구멍이 난다. 그날 전체를 다시 읽는다.
+        #
+        # **남은 개최일을 전부 읽는다.** 전에는 target_day 하루만 읽었는데,
+        # 경정은 수·목 이틀 연속이고 수요일 결과는 목요일에야 들어온다. 그래서
+        # 수요일 밤이면 수·목이 동시에 '결과 없음' 이 되고, target_day 는 둘 중
+        # 이른 수요일이 된다 — 목요일 예상이 확정 저장돼 있는데도 경주일 목록에도
+        # 상세에도 없는 상태가 하룻밤 내내 이어졌다. 정작 그때가 다음 경주를
+        # 보려는 시점이다.
+        pending_days = sorted(set(pending))
         upcoming = []
-        if target_day:
-            for row in conn.execute(DAY_SQL, (LIVE_VERSION, target_day)):
+        for ymd in pending_days or ([target_day] if target_day else []):
+            for row in conn.execute(DAY_SQL, (LIVE_VERSION, ymd)):
                 r = _dict(row)
                 r["date_label"] = fmt_date(r["race_ymd"])
                 r["version"] = LIVE_VERSION
                 upcoming.append(r)
+        shown = {r["race_key"] for r in upcoming}
 
-        # 결과 아카이브는 그날을 빼고 쌓는다 — 같은 경주가 두 번 나오지 않게.
-        finished = [r for r in live if r["has_result"] and r["race_ymd"] != target_day]
+        # 결과 아카이브는 위에 실은 날을 빼고 쌓는다 — 같은 경주가 두 번 나오지
+        # 않게. (그날 일부만 결과가 들어온 경우까지 잡으려면 경주 단위로 뺀다.)
+        finished = [r for r in live if r["has_result"] and r["race_key"] not in shown]
         # 사후 예상은 공개 기록 다음에 둔다. 배지로 구분되므로 섞여도 오해가 없고,
         # 목록에서 그날만 통째로 비는 것보다 낫다.
-        finished += [r for r in late if r["has_result"] and r["race_ymd"] != target_day]
-        finished += [r for r in oos if r["has_result"] and r["race_ymd"] != target_day]
+        finished += [r for r in late if r["has_result"] and r["race_key"] not in shown]
+        finished += [r for r in oos if r["has_result"] and r["race_key"] not in shown]
         # 날짜 최신순, 하루 안에서는 1R 부터.
         finished.sort(key=lambda r: (r["race_ymd"] or "", -(r["race_no"] or 0)),
                       reverse=True)
