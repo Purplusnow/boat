@@ -52,6 +52,7 @@ python -m boatai.model train                 # 학습 + 워크포워드 검증
 python -m boatai.predict upcoming            # 발주 전 경주의 예상 확정 저장
 python -m boatai.verify                      # 실전 기록 검증
 python -m boatai.audit --days 30 --strict    # 자료 결손 점검
+python -m boatai.health --strict             # 파이프라인 자체 점검
 python -m boatai.site                        # dist/ 로 정적 사이트 빌드
 ```
 
@@ -380,6 +381,10 @@ v(r) = √(A·r)          t(r) = π·r / v(r) = π·√(r/A)
   있다. 나중 수집이 앞선 수집을 지우지 않도록 upsert 가 `COALESCE` 로 병합한다.
 * **결손을 센다** — `audit` 이 배당·착순·출주표·예측 누락을 세고 `--strict` 면
   비정상 종료한다. 성공한 파이프라인이 조용한 것은 신호가 아니다.
+* **조용한 실패에 빨간불을 낸다** — `health` 가 '제때 할 일을 했는지' 를 따로
+  본다. 러너에서 포털 연결이 끊겨도 배포는 성공하고 화면만 비었던 적이 있어서,
+  배포와 별개로 결손을 세고 자동 실행을 실패로 만든다. `audit` 이 자료를 본다면
+  `health` 는 우리를 본다.
 * **누수 테스트** — 결과에서 온 값이 피처 목록에 들어가면 테스트가 깨진다.
 
 ## 테스트
@@ -408,6 +413,7 @@ src/boatai/
   predict.py          예상 생성과 발주 전 확정 저장
   verify.py           승식 판정 (단승·연승·쌍승·복승·삼복승 + 박스)
   audit.py            자료 결손 점검
+  health.py           파이프라인 자체 점검 (제때 예상·결과를 챙겼는가)
   marks.py            예상 기호 (★ 기준은 과거 기록에서 보정)
   simulate.py         1턴마크 선회 물리 시뮬레이션
   strategy.py         베팅금·선택 규칙 시뮬레이션
