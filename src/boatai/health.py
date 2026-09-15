@@ -25,9 +25,11 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import os
 import sqlite3
 import sys
+from pathlib import Path
 from typing import List, NamedTuple, Optional
 
 from .clock import now_kst
@@ -40,6 +42,9 @@ ENTRY_DEADLINE = dt.timedelta(hours=3)
 
 # 결과는 하루 뒤에 공개된다. 이틀이 지나도 없으면 지연이 아니라 결손이다.
 RESULT_GRACE_DAYS = 2
+
+# 확정 기록 원본. DB 는 캐시지만 이 파일은 저장소에 남는다.
+FROZEN_PATH = Path("records/frozen.json")
 
 ROW_SQL = """
 SELECT g.race_key, g.race_ymd, g.race_no, g.post_time,
@@ -70,8 +75,33 @@ def _post_at(ymd: str, hhmm: Optional[str]) -> Optional[dt.datetime]:
         return None
 
 
+def stale_db(conn: sqlite3.Connection, path: Path = FROZEN_PATH) -> int:
+    """저장소의 확정 기록 중 DB 에 없는 행 수.
+
+    **이 점검의 결론은 DB 가 최신일 때만 뜻이 있다.** 실제로 한 번 속았다.
+    자동 실행은 이미 그날 예상을 만들어 저장소에 올려 뒀는데, 손에 있는 DB 가
+    며칠 전 것이라 '발주 전 예상 없음' 경보가 떴다. 그대로 믿고 예상을 다시
+    만들어 올릴 뻔했다 — 같은 값이라 손해는 없었지만, 경보를 보고 잘못된 일을
+    하게 만드는 점검은 없느니만 못하다.
+
+    자동 실행에서는 앞 단계가 늘 ``predict import`` 를 돌리므로 0 이다. 0 이
+    아니라면 그 자체가 신호다 — 되돌리기가 실패했거나, 손에 있는 DB 가 낡았거나.
+    """
+    if not path.exists():
+        return 0
+    try:
+        blob = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0
+    have = {(r[0], r[1], r[2]) for r in conn.execute(
+        "SELECT race_key, lane, model_version FROM predictions")}
+    return sum(1 for r in blob.get("predictions", [])
+               if (r["race_key"], r["lane"], r["model_version"]) not in have)
+
+
 def check(conn: sqlite3.Connection, now: Optional[dt.datetime] = None,
-          *, version: str = MODEL_VERSION, days: int = 7) -> List[Issue]:
+          *, version: str = MODEL_VERSION, days: int = 7,
+          frozen_path: Path = FROZEN_PATH) -> List[Issue]:
     """최근 며칠과 앞날을 훑어 '했어야 하는데 안 한 것' 을 찾는다."""
     now = now or now_kst()
     since = (now - dt.timedelta(days=days)).strftime("%Y%m%d")
@@ -132,6 +162,14 @@ def check(conn: sqlite3.Connection, now: Optional[dt.datetime] = None,
     for ymd, n in sorted(stale_result.items()):
         issues.append(Issue(True, "결과 미수집",
                             f"{ymd} {n}경주 — 이틀이 지났는데 착순이 없다."))
+
+    # 맨 뒤에 붙인다. 위 경보들이 이 상태 때문에 생긴 허상일 수 있다는 단서다.
+    behind = stale_db(conn, frozen_path)
+    if behind:
+        issues.append(Issue(False, "DB 가 확정 기록보다 뒤짐",
+                            f"저장소 기록 {behind}행이 DB 에 없다. "
+                            "`predict import` 를 먼저 돌려라 — "
+                            "위 경보는 그때까지 믿을 수 없다."))
     return issues
 
 
@@ -176,10 +214,11 @@ def main(argv=None) -> int:
         return 0
 
     for it in issues:
-        print(f"  ▸ {it.kind} — {it.detail}")
+        print(f"  {'▸' if it.fatal else '·'} {it.kind} — {it.detail}")
         # GitHub Actions 로그에서 눈에 띄게 한다.
         if os.environ.get("GITHUB_ACTIONS"):
-            print(f"::error title={it.kind}::{it.detail}")
+            level = "error" if it.fatal else "warning"
+            print(f"::{level} title={it.kind}::{it.detail}")
     print()
     return 1 if args.strict and any(i.fatal for i in issues) else 0
 

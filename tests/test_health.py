@@ -48,8 +48,14 @@ def _race(conn, *, key, ymd, no, post, entries=6, preds=0, ords=0):
     conn.commit()
 
 
+# 저장소의 진짜 확정 기록을 읽지 않도록 없는 경로를 준다. 그것까지 보면
+# 테스트가 작업 디렉터리 상태에 따라 갈린다.
+NO_FROZEN = Path("/nonexistent/frozen.json")
+
+
 def _kinds(conn):
-    return {i.kind for i in health.check(conn, NOW, version=VERSION)}
+    return {i.kind for i in health.check(conn, NOW, version=VERSION,
+                                         frozen_path=NO_FROZEN)}
 
 
 def test_출주표가_있는데_예상이_없으면_경보(tmp_path):
@@ -102,5 +108,44 @@ def test_경보는_모두_치명으로_표시된다(tmp_path):
     """--strict 가 걸러 내지 못하면 자동화가 빨간불을 못 낸다."""
     with _db(tmp_path) as conn:
         _race(conn, key="2026-36-1-05", ymd="20260902", no=5, post="13:12")
-        issues = health.check(conn, NOW, version=VERSION)
+        issues = health.check(conn, NOW, version=VERSION, frozen_path=NO_FROZEN)
         assert issues and all(i.fatal for i in issues)
+
+
+def test_DB_가_확정_기록보다_뒤지면_알려준다(tmp_path):
+    """실제로 이것 때문에 한 번 속았다.
+
+    자동 실행은 이미 그날 예상을 만들어 저장소에 올려 뒀는데, 손에 있는 DB 가
+    며칠 전 것이라 '발주 전 예상 없음' 경보가 떴다. 경보를 믿고 같은 예상을
+    다시 만들어 올릴 뻔했다. 경보가 허상일 수 있다는 단서를 같이 내야 한다.
+    """
+    import json
+
+    frozen = tmp_path / "frozen.json"
+    frozen.write_text(json.dumps({"predictions": [
+        {"race_key": "2026-36-1-05", "lane": 1, "racer_nm": "선수1",
+         "p_win": 0.3, "pred_rank": 1, "model_version": VERSION},
+    ], "simulations": []}), encoding="utf-8")
+
+    with _db(tmp_path) as conn:
+        _race(conn, key="2026-36-1-05", ymd="20260902", no=5, post="13:12")
+        issues = health.check(conn, NOW, version=VERSION, frozen_path=frozen)
+        kinds = {i.kind for i in issues}
+        assert "DB 가 확정 기록보다 뒤짐" in kinds
+        # 이것만으로 빨간불을 내지는 않는다 — 고칠 대상은 로컬 상태지 파이프라인이 아니다.
+        assert not [i for i in issues if i.kind == "DB 가 확정 기록보다 뒤짐" and i.fatal]
+
+
+def test_DB_가_최신이면_조용하다(tmp_path):
+    import json
+
+    frozen = tmp_path / "frozen.json"
+    frozen.write_text(json.dumps({"predictions": [
+        {"race_key": "2026-36-1-05", "lane": 1, "racer_nm": "선수1",
+         "p_win": 0.3, "pred_rank": 1, "model_version": VERSION},
+    ], "simulations": []}), encoding="utf-8")
+
+    with _db(tmp_path) as conn:
+        _race(conn, key="2026-36-1-05", ymd="20260902", no=5, post="13:12", preds=6)
+        assert {i.kind for i in health.check(conn, NOW, version=VERSION,
+                                            frozen_path=frozen)} == set()
