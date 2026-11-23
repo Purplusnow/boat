@@ -27,7 +27,8 @@ def _db(tmp_path):
     return session(tmp_path / "t.sqlite")
 
 
-def _race(conn, *, key, ymd, no, post, entries=6, preds=0, ords=0):
+def _race(conn, *, key, ymd, no, post, entries=6, preds=0, ords=0, blanks=0,
+          payoff=False):
     """경주 하나를 원하는 상태로 심는다."""
     yr, wtc, dtc, _ = key.split("-")
     conn.execute(
@@ -45,6 +46,13 @@ def _race(conn, *, key, ymd, no, post, entries=6, preds=0, ords=0):
     for lane in range(1, ords + 1):
         conn.execute("INSERT INTO results(race_key, lane, racer_nm, ord) VALUES(?,?,?,?)",
                      (key, lane, f"선수{lane}", lane))
+    for lane in range(1, blanks + 1):
+        # 순위 없는 착순 행 — 공개 전이거나 취소된 경주가 이렇게 남는다.
+        conn.execute("INSERT INTO results(race_key, lane, racer_nm) VALUES(?,?,?)",
+                     (key, lane, f"선수{lane}"))
+    if payoff:
+        conn.execute("INSERT INTO payoffs(race_key, pool, combo, payout) "
+                     "VALUES(?,?,?,?)", (key, "단승", "1", 2.0))
     conn.commit()
 
 
@@ -94,6 +102,31 @@ def test_예상_없이_발주가_지나면_경보(tmp_path):
 def test_이틀_지난_경주에_착순이_없으면_경보(tmp_path):
     with _db(tmp_path) as conn:
         _race(conn, key="2026-35-2-01", ymd="20260827", no=1, post="11:40", preds=6)
+        assert "결과 미수집" in _kinds(conn)
+
+
+def test_취소된_경주는_빨간불이_아니다(tmp_path):
+    """2026-11-18 7~9R 이 실제로 이랬다. 착순 행은 있는데 순위가 전부 비고
+    배당도 없다. 같은 날 다른 경주는 결과가 들어왔다. 이걸 결손으로 세면
+    영영 메워지지 않는 빨간불이 매 실행 뜬다."""
+    with _db(tmp_path) as conn:
+        _race(conn, key="2026-35-2-06", ymd="20260827", no=6, post="13:00",
+              preds=6, ords=6, payoff=True)
+        _race(conn, key="2026-35-2-07", ymd="20260827", no=7, post="13:30",
+              preds=6, blanks=6)
+        issues = health.check(conn, NOW, version=VERSION, frozen_path=NO_FROZEN)
+        kinds = {i.kind for i in issues}
+        assert "결과 미수집" not in kinds
+        assert "경주 취소 추정" in kinds
+        assert not any(i.fatal for i in issues)
+
+
+def test_그날_결과가_통째로_없으면_취소가_아니라_결손이다(tmp_path):
+    """순위 빈 착순 행만 있고 같은 날 어느 경주도 결과가 없다면 공개가 막힌
+    것이다. 취소로 넘기면 조용한 실패가 된다."""
+    with _db(tmp_path) as conn:
+        _race(conn, key="2026-35-2-07", ymd="20260827", no=7, post="13:30",
+              preds=6, blanks=6)
         assert "결과 미수집" in _kinds(conn)
 
 

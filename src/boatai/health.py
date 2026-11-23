@@ -52,6 +52,10 @@ SELECT g.race_key, g.race_ymd, g.race_no, g.post_time,
          WHERE e.race_key = g.race_key)                       AS n_entry,
        (SELECT COUNT(*) FROM results r
          WHERE r.race_key = g.race_key AND r.ord IS NOT NULL)  AS n_ord,
+       (SELECT COUNT(*) FROM results r
+         WHERE r.race_key = g.race_key)                       AS n_res,
+       (SELECT COUNT(*) FROM payoffs y
+         WHERE y.race_key = g.race_key)                       AS n_pay,
        (SELECT COUNT(*) FROM predictions p
          WHERE p.race_key = g.race_key AND p.model_version = ?) AS n_pred
   FROM races g
@@ -115,6 +119,10 @@ def check(conn: sqlite3.Connection, now: Optional[dt.datetime] = None,
     missed_post: dict = {}
     no_entry_soon: dict = {}
     stale_result: dict = {}
+    void_race: dict = {}
+
+    # 착순이 하나라도 들어온 개최일. 그날 결과가 이미 공개됐다는 뜻이다.
+    days_with_ord = {r["race_ymd"] for r in rows if r["n_ord"]}
 
     for r in rows:
         ymd = r["race_ymd"]
@@ -144,6 +152,13 @@ def check(conn: sqlite3.Connection, now: Optional[dt.datetime] = None,
         # 결과는 하루 늦게 들어온다. 이틀이 지나도 없으면 결손이다.
         if ymd < (now - dt.timedelta(days=RESULT_GRACE_DAYS)).strftime("%Y%m%d") \
                 and r["n_entry"] and not r["n_ord"]:
+            # 취소된 경주는 착순 API 에 선수 행만 남고 순위가 전부 비며, 배당도
+            # 없다 (실측: 2026-11-18 7~9R — 6R 다음 배당이 바로 10R). 같은 날
+            # 다른 경주 결과가 들어와 있다면 공개 지연이 아니라 취소다. 이걸
+            # 결손으로 세면 영영 메워지지 않는 빨간불이 매 실행 뜬다.
+            if r["n_res"] and not r["n_pay"] and ymd in days_with_ord:
+                void_race.setdefault(ymd, []).append(r["race_no"])
+                continue
             stale_result.setdefault(ymd, 0)
             stale_result[ymd] += 1
 
@@ -162,6 +177,10 @@ def check(conn: sqlite3.Connection, now: Optional[dt.datetime] = None,
     for ymd, n in sorted(stale_result.items()):
         issues.append(Issue(True, "결과 미수집",
                             f"{ymd} {n}경주 — 이틀이 지났는데 착순이 없다."))
+    for ymd, nos in sorted(void_race.items()):
+        issues.append(Issue(False, "경주 취소 추정",
+                            f"{ymd} {', '.join(f'{n}R' for n in nos)} — 착순 순위와 "
+                            "배당이 모두 없고 같은 날 다른 경주는 결과가 있다."))
 
     # 맨 뒤에 붙인다. 위 경보들이 이 상태 때문에 생긴 허상일 수 있다는 단서다.
     behind = stale_db(conn, frozen_path)
